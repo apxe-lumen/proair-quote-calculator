@@ -3,6 +3,44 @@
 import { useMemo, useState } from "react";
 
 const unitSizes = [2.0, 2.5, 3.5, 4.2, 5.0, 6.0, 7.1, 8.5, 10.0];
+const modelMap = {
+  2.0: {
+    mitsubishi: "MSZ-AY20VGKP",
+    midea: "Xtreme Save Lite 2.0kW",
+  },
+  2.5: {
+    mitsubishi: "MSZ-AY25VGKP",
+    midea: "Solstice 2.6kW",
+  },
+  3.5: {
+    mitsubishi: "MSZ-AY35VGKP",
+    midea: "Solstice 3.5kW",
+  },
+  4.2: {
+    mitsubishi: "MSZ-AP42VGKP",
+    midea: "Solstice 5.0kW",
+  },
+  5.0: {
+    mitsubishi: "MSZ-AP50VGKP",
+    midea: "Solstice 5.0kW",
+  },
+  6.0: {
+    mitsubishi: "MSZ-AP60VGKP",
+    midea: "Solstice 7.0kW",
+  },
+  7.1: {
+    mitsubishi: "MSZ-AP71VGKP",
+    midea: "Solstice 7.0kW",
+  },
+  8.5: {
+    mitsubishi: "PLA-M85EA cassette / larger system",
+    midea: "Cassette or larger split system",
+  },
+  10.0: {
+    mitsubishi: "Larger split / cassette / ducted system",
+    midea: "Larger split / cassette / ducted system",
+  },
+};
 
 function roundToRecommendedSize(kw) {
   for (const size of unitSizes) {
@@ -41,12 +79,19 @@ export default function Page() {
 
     const kw = (area * wattsPerM2 * factor) / 1000;
     const recommended = roundToRecommendedSize(kw);
+    const recommendedKey = Number(recommended.toFixed(1));
+const models = modelMap[recommendedKey] || {
+  mitsubishi: "No model mapped",
+  midea: "No model mapped",
+};
 
     return {
-      area: area.toFixed(1),
-      kw: kw.toFixed(2),
-      recommended: recommended.toFixed(1),
-    };
+  area: area.toFixed(1),
+  kw: kw.toFixed(2),
+  recommended: recommended.toFixed(1),
+  mitsubishi: models.mitsubishi,
+  midea: models.midea,
+};
   }, [length, width, height, roomType, glazing, exposure]);
 
   return (
