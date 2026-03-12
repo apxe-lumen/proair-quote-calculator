@@ -3,10 +3,14 @@ export const metadata = {
   description: "ProAir room sizing calculator",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body style={{ margin: 0 }}>{children}</body>
+      <body style={{ margin: 0, fontFamily: "Arial, sans-serif" }}>{children}</body>
     </html>
   );
 }
