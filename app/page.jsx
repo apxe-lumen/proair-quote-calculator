@@ -193,6 +193,20 @@ const models = modelMap[recommendedKey] || {
             <p style={{ fontSize: "32px", fontWeight: 700, color: "#0b2e73" }}>
               Recommended unit: {result.recommended} kW
             </p>
+            <div
+  style={{
+    marginTop: "24px",
+    background: "#f3f4f6",
+    borderRadius: "12px",
+    padding: "16px",
+  }}
+>
+  <p style={{ marginTop: 0, fontWeight: 700 }}>Suggested Mitsubishi Electric</p>
+  <p>{result.mitsubishi}</p>
+
+  <p style={{ fontWeight: 700, marginTop: "16px" }}>Suggested Midea</p>
+  <p style={{ marginBottom: 0 }}>{result.midea}</p>
+</div>
           </div>
         </div>
       </div>
