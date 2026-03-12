@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 const unitSizes = [2.0, 2.5, 3.5, 4.2, 5.0, 6.0, 7.1, 8.5, 10.0];
 
-const modelMap = {
+const wallModelMap = {
   2.0: {
     mitsubishi: "MSZ-AY20VGKP",
     midea: "Xtreme Save Lite 2.0kW",
@@ -34,12 +34,90 @@ const modelMap = {
     midea: "Solstice 7.0kW",
   },
   8.5: {
-    mitsubishi: "Larger split / cassette / ducted system",
-    midea: "Larger split / cassette / ducted system",
+    mitsubishi: "Larger wall split / alternative system required",
+    midea: "Larger wall split / alternative system required",
   },
   10.0: {
-    mitsubishi: "Larger split / cassette / ducted system",
-    midea: "Larger split / cassette / ducted system",
+    mitsubishi: "Larger wall split / alternative system required",
+    midea: "Larger wall split / alternative system required",
+  },
+};
+
+const cassetteModelMap = {
+  2.0: {
+    mitsubishi: "PLA-M25EA cassette",
+    midea: "Compact cassette 2.6kW",
+  },
+  2.5: {
+    mitsubishi: "PLA-M25EA cassette",
+    midea: "Compact cassette 2.6kW",
+  },
+  3.5: {
+    mitsubishi: "PLA-M35EA cassette",
+    midea: "Cassette 3.5kW",
+  },
+  4.2: {
+    mitsubishi: "PLA-M42EA cassette",
+    midea: "Cassette 5.0kW",
+  },
+  5.0: {
+    mitsubishi: "PLA-M50EA cassette",
+    midea: "Cassette 5.0kW",
+  },
+  6.0: {
+    mitsubishi: "PLA-M60EA cassette",
+    midea: "Cassette 7.0kW",
+  },
+  7.1: {
+    mitsubishi: "PLA-M71EA cassette",
+    midea: "Cassette 7.0kW",
+  },
+  8.5: {
+    mitsubishi: "PLA / larger cassette system",
+    midea: "Larger cassette system",
+  },
+  10.0: {
+    mitsubishi: "Larger cassette system",
+    midea: "Larger cassette system",
+  },
+};
+
+const ductedModelMap = {
+  2.0: {
+    mitsubishi: "PEAD-M25 ducted",
+    midea: "Slim duct 2.6kW",
+  },
+  2.5: {
+    mitsubishi: "PEAD-M25 ducted",
+    midea: "Slim duct 2.6kW",
+  },
+  3.5: {
+    mitsubishi: "PEAD-M35 ducted",
+    midea: "Slim duct 3.5kW",
+  },
+  4.2: {
+    mitsubishi: "PEAD-M42 ducted",
+    midea: "Ducted 5.0kW",
+  },
+  5.0: {
+    mitsubishi: "PEAD-M50 ducted",
+    midea: "Ducted 5.0kW",
+  },
+  6.0: {
+    mitsubishi: "PEAD-M60 ducted",
+    midea: "Ducted 7.0kW",
+  },
+  7.1: {
+    mitsubishi: "PEAD-M71 ducted",
+    midea: "Ducted 7.0kW",
+  },
+  8.5: {
+    mitsubishi: "Larger ducted system",
+    midea: "Larger ducted system",
+  },
+  10.0: {
+    mitsubishi: "Larger ducted system",
+    midea: "Larger ducted system",
   },
 };
 
@@ -50,58 +128,51 @@ function roundToRecommendedSize(kw) {
   return unitSizes[unitSizes.length - 1];
 }
 
-function getPriceBand(brand, recommended) {
+function getPriceBand(brand, recommended, systemType) {
+  let uplift = 0;
+
+  if (systemType === "cassette") uplift = 250;
+  if (systemType === "ducted") uplift = 500;
+
   if (brand === "mitsubishi") {
     if (recommended <= 3.5) {
-      return {
-        from: 1800,
-        to: 2000,
-      };
+      return { from: 1800 + uplift, to: 2000 + uplift };
     }
     if (recommended <= 5.0) {
-      return {
-        from: 2400,
-        to: 2600,
-      };
+      return { from: 2400 + uplift, to: 2600 + uplift };
     }
     if (recommended <= 7.1) {
-      return {
-        from: 3000,
-        to: 3300,
-      };
+      return { from: 3000 + uplift, to: 3300 + uplift };
     }
-    return {
-      from: 3500,
-      to: 4500,
-    };
+    return { from: 3500 + uplift, to: 4500 + uplift };
   }
 
   if (recommended <= 3.5) {
-    return {
-      from: 1500,
-      to: 1700,
-    };
+    return { from: 1500 + uplift, to: 1700 + uplift };
   }
   if (recommended <= 5.0) {
-    return {
-      from: 2000,
-      to: 2200,
-    };
+    return { from: 2000 + uplift, to: 2200 + uplift };
   }
   if (recommended <= 7.1) {
-    return {
-      from: 2600,
-      to: 2900,
-    };
+    return { from: 2600 + uplift, to: 2900 + uplift };
   }
-  return {
-    from: 3000,
-    to: 4000,
-  };
+  return { from: 3000 + uplift, to: 4000 + uplift };
 }
 
 function formatPrice(value) {
   return `£${value.toLocaleString("en-GB")}`;
+}
+
+function getModelMapForSystem(systemType) {
+  if (systemType === "cassette") return cassetteModelMap;
+  if (systemType === "ducted") return ductedModelMap;
+  return wallModelMap;
+}
+
+function getSystemLabel(systemType) {
+  if (systemType === "cassette") return "Cassette system";
+  if (systemType === "ducted") return "Ducted system";
+  return "Wall mounted split system";
 }
 
 export default function Page() {
@@ -112,6 +183,7 @@ export default function Page() {
   const [glazing, setGlazing] = useState("medium");
   const [exposure, setExposure] = useState("south");
   const [brandPreference, setBrandPreference] = useState("both");
+  const [systemType, setSystemType] = useState("wall");
   const [notes, setNotes] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -137,33 +209,27 @@ export default function Page() {
 
     const kw = (area * wattsPerM2 * factor) / 1000;
     const recommended = roundToRecommendedSize(kw);
-    const models = modelMap[recommended] || {
+
+    const selectedMap = getModelMapForSystem(systemType);
+    const models = selectedMap[recommended] || {
       mitsubishi: "No model mapped",
       midea: "No model mapped",
     };
 
-    let systemType = "Wall mounted split system";
-    if (recommended >= 6) {
-      systemType = "Wall mounted or cassette system";
-    }
-    if (recommended >= 8) {
-      systemType = "Cassette or ducted system";
-    }
-
-    const mitsubishiPrice = getPriceBand("mitsubishi", recommended);
-    const mideaPrice = getPriceBand("midea", recommended);
+    const mitsubishiPrice = getPriceBand("mitsubishi", recommended, systemType);
+    const mideaPrice = getPriceBand("midea", recommended, systemType);
 
     return {
       area: area.toFixed(1),
       kw: kw.toFixed(2),
       recommended: recommended.toFixed(1),
-      systemType,
+      systemLabel: getSystemLabel(systemType),
       mitsubishi: models.mitsubishi,
       midea: models.midea,
       mitsubishiPrice,
       mideaPrice,
     };
-  }, [length, width, height, roomType, glazing, exposure]);
+  }, [length, width, height, roomType, glazing, exposure, systemType]);
 
   const summary = useMemo(() => {
     const lines = [
@@ -174,15 +240,15 @@ export default function Page() {
       `Room type: ${roomType}`,
       `Glazing: ${glazing}`,
       `Sun exposure: ${exposure}`,
+      `System type: ${result.systemLabel}`,
       `Estimated load: ${result.kw} kW`,
       `Recommended unit: ${result.recommended} kW`,
-      `Suggested system: ${result.systemType}`,
       "",
     ];
 
     if (brandPreference === "both" || brandPreference === "mitsubishi") {
       lines.push("Mitsubishi Electric");
-      lines.push(`${result.mitsubishi}`);
+      lines.push(result.mitsubishi);
       lines.push(
         `Estimated installed price: ${formatPrice(result.mitsubishiPrice.from)} to ${formatPrice(result.mitsubishiPrice.to)}`
       );
@@ -191,7 +257,7 @@ export default function Page() {
 
     if (brandPreference === "both" || brandPreference === "midea") {
       lines.push("Midea");
-      lines.push(`${result.midea}`);
+      lines.push(result.midea);
       lines.push(
         `Estimated installed price: ${formatPrice(result.mideaPrice.from)} to ${formatPrice(result.mideaPrice.to)}`
       );
@@ -331,6 +397,17 @@ export default function Page() {
               <option value="south">South</option>
             </select>
 
+            <label>System type</label>
+            <select
+              value={systemType}
+              onChange={(e) => setSystemType(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="wall">Wall mounted</option>
+              <option value="cassette">Cassette</option>
+              <option value="ducted">Ducted</option>
+            </select>
+
             <label>Preferred brand</label>
             <select
               value={brandPreference}
@@ -362,12 +439,8 @@ export default function Page() {
           >
             <h2 style={{ fontSize: "32px", marginTop: 0 }}>Result</h2>
 
-            <p>
-              <strong>Area:</strong> {result.area} m²
-            </p>
-            <p>
-              <strong>Estimated load:</strong> {result.kw} kW
-            </p>
+            <p><strong>Area:</strong> {result.area} m²</p>
+            <p><strong>Estimated load:</strong> {result.kw} kW</p>
 
             <p
               style={{
@@ -382,7 +455,7 @@ export default function Page() {
             </p>
 
             <p style={{ marginTop: 0, fontWeight: 600 }}>
-              Suggested system: {result.systemType}
+              Suggested system: {result.systemLabel}
             </p>
 
             {(brandPreference === "both" || brandPreference === "mitsubishi") && (
@@ -458,9 +531,9 @@ export default function Page() {
                 lineHeight: 1.5,
               }}
             >
-              Guide prices only. Final pricing should still be adjusted for pipe
-              run, brackets, trunking, access, electrical work, condensate route and
-              overall install difficulty.
+              Guide prices only. Final pricing should still be adjusted for pipe run,
+              brackets, trunking, access, electrical work, condensate route and overall
+              install difficulty.
             </p>
           </div>
         </div>
