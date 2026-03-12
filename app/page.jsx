@@ -56,27 +56,23 @@ function getPriceBand(brand, recommended) {
       return {
         from: 1800,
         to: 2000,
-        note: "Typical single split allowance for Mitsubishi Electric wall mount.",
       };
     }
     if (recommended <= 5.0) {
       return {
         from: 2400,
         to: 2600,
-        note: "Allows for larger unit, extra materials and typical labour uplift.",
       };
     }
     if (recommended <= 7.1) {
       return {
         from: 3000,
         to: 3300,
-        note: "Usually a larger wall mount or more involved install.",
       };
     }
     return {
       from: 3500,
       to: 4500,
-      note: "Likely needs site-specific pricing due to system type and install complexity.",
     };
   }
 
@@ -84,27 +80,23 @@ function getPriceBand(brand, recommended) {
     return {
       from: 1500,
       to: 1700,
-      note: "Typical single split allowance for Midea wall mount.",
     };
   }
   if (recommended <= 5.0) {
     return {
       from: 2000,
       to: 2200,
-      note: "Allows for larger indoor/outdoor set and usual install uplift.",
     };
   }
   if (recommended <= 7.1) {
     return {
       from: 2600,
       to: 2900,
-      note: "Usually a larger wall mount or more involved install.",
     };
   }
   return {
     from: 3000,
     to: 4000,
-    note: "Likely needs site-specific pricing due to system type and install complexity.",
   };
 }
 
@@ -119,6 +111,9 @@ export default function Page() {
   const [roomType, setRoomType] = useState("living");
   const [glazing, setGlazing] = useState("medium");
   const [exposure, setExposure] = useState("south");
+  const [brandPreference, setBrandPreference] = useState("both");
+  const [notes, setNotes] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const result = useMemo(() => {
     const area = length * width;
@@ -170,6 +165,72 @@ export default function Page() {
     };
   }, [length, width, height, roomType, glazing, exposure]);
 
+  const summary = useMemo(() => {
+    const lines = [
+      "PROAIR | Climate Control",
+      "",
+      `Room size: ${length}m x ${width}m x ${height}m`,
+      `Area: ${result.area} m²`,
+      `Room type: ${roomType}`,
+      `Glazing: ${glazing}`,
+      `Sun exposure: ${exposure}`,
+      `Estimated load: ${result.kw} kW`,
+      `Recommended unit: ${result.recommended} kW`,
+      `Suggested system: ${result.systemType}`,
+      "",
+    ];
+
+    if (brandPreference === "both" || brandPreference === "mitsubishi") {
+      lines.push("Mitsubishi Electric");
+      lines.push(`${result.mitsubishi}`);
+      lines.push(
+        `Estimated installed price: ${formatPrice(result.mitsubishiPrice.from)} to ${formatPrice(result.mitsubishiPrice.to)}`
+      );
+      lines.push("");
+    }
+
+    if (brandPreference === "both" || brandPreference === "midea") {
+      lines.push("Midea");
+      lines.push(`${result.midea}`);
+      lines.push(
+        `Estimated installed price: ${formatPrice(result.mideaPrice.from)} to ${formatPrice(result.mideaPrice.to)}`
+      );
+      lines.push("");
+    }
+
+    if (notes.trim()) {
+      lines.push("Survey notes");
+      lines.push(notes.trim());
+      lines.push("");
+    }
+
+    lines.push(
+      "Guide prices only. Final pricing depends on pipe run, trunking, access, electrics, condensate route and overall install difficulty."
+    );
+
+    return lines.join("\n");
+  }, [
+    length,
+    width,
+    height,
+    roomType,
+    glazing,
+    exposure,
+    brandPreference,
+    notes,
+    result,
+  ]);
+
+  const handleCopySummary = async () => {
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Copy failed", error);
+    }
+  };
+
   return (
     <div
       style={{
@@ -180,7 +241,7 @@ export default function Page() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
         <div style={{ marginBottom: "24px" }}>
           <h1 style={{ margin: 0, fontSize: "42px", fontWeight: 700 }}>
             <span style={{ color: "#666a73" }}>PRO</span>
@@ -269,6 +330,26 @@ export default function Page() {
               <option value="west">West</option>
               <option value="south">South</option>
             </select>
+
+            <label>Preferred brand</label>
+            <select
+              value={brandPreference}
+              onChange={(e) => setBrandPreference(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="both">Show both</option>
+              <option value="mitsubishi">Mitsubishi Electric only</option>
+              <option value="midea">Midea only</option>
+            </select>
+
+            <label>Survey notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. long pipe run, awkward condensate route, external wall brackets, customer prefers premium option..."
+              style={textAreaStyle}
+              rows={5}
+            />
           </div>
 
           <div
@@ -304,29 +385,68 @@ export default function Page() {
               Suggested system: {result.systemType}
             </p>
 
+            {(brandPreference === "both" || brandPreference === "mitsubishi") && (
+              <div
+                style={{
+                  marginTop: "24px",
+                  background: "#e9edf3",
+                  borderRadius: "14px",
+                  padding: "18px",
+                }}
+              >
+                <p style={{ marginTop: 0, fontWeight: 700 }}>
+                  Suggested Mitsubishi Electric
+                </p>
+                <p style={{ marginBottom: "8px" }}>{result.mitsubishi}</p>
+                <p style={{ marginTop: 0, marginBottom: 0, color: "#334155" }}>
+                  Estimated installed price: {formatPrice(result.mitsubishiPrice.from)} to{" "}
+                  {formatPrice(result.mitsubishiPrice.to)}
+                </p>
+              </div>
+            )}
+
+            {(brandPreference === "both" || brandPreference === "midea") && (
+              <div
+                style={{
+                  marginTop: "18px",
+                  background: "#e9edf3",
+                  borderRadius: "14px",
+                  padding: "18px",
+                }}
+              >
+                <p style={{ marginTop: 0, fontWeight: 700 }}>Suggested Midea</p>
+                <p style={{ marginBottom: "8px" }}>{result.midea}</p>
+                <p style={{ marginTop: 0, marginBottom: 0, color: "#334155" }}>
+                  Estimated installed price: {formatPrice(result.mideaPrice.from)} to{" "}
+                  {formatPrice(result.mideaPrice.to)}
+                </p>
+              </div>
+            )}
+
             <div
               style={{
-                marginTop: "24px",
-                background: "#e9edf3",
+                marginTop: "20px",
+                background: "#eef2f7",
                 borderRadius: "14px",
-                padding: "18px",
+                padding: "16px",
               }}
             >
-              <p style={{ marginTop: 0, fontWeight: 700 }}>
-                Suggested Mitsubishi Electric
-              </p>
-              <p style={{ marginBottom: "8px" }}>{result.mitsubishi}</p>
-              <p style={{ marginTop: 0, color: "#334155" }}>
-                Estimated installed price: {formatPrice(result.mitsubishiPrice.from)} to{" "}
-                {formatPrice(result.mitsubishiPrice.to)}
-              </p>
+              <p style={{ marginTop: 0, fontWeight: 700 }}>Copy summary</p>
+              <pre
+                style={{
+                  whiteSpace: "pre-wrap",
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "14px",
+                  color: "#334155",
+                  marginBottom: "14px",
+                }}
+              >
+                {summary}
+              </pre>
 
-              <p style={{ fontWeight: 700, marginTop: "18px" }}>Suggested Midea</p>
-              <p style={{ marginBottom: "8px" }}>{result.midea}</p>
-              <p style={{ marginTop: 0, marginBottom: 0, color: "#334155" }}>
-                Estimated installed price: {formatPrice(result.mideaPrice.from)} to{" "}
-                {formatPrice(result.mideaPrice.to)}
-              </p>
+              <button onClick={handleCopySummary} style={buttonStyle}>
+                {copied ? "Copied" : "Copy survey summary"}
+              </button>
             </div>
 
             <p
@@ -338,9 +458,9 @@ export default function Page() {
                 lineHeight: 1.5,
               }}
             >
-              Guide prices only. Final pricing should still be adjusted for pipe run,
-              brackets, trunking, access, electrical work, condensate route and overall
-              install difficulty.
+              Guide prices only. Final pricing should still be adjusted for pipe
+              run, brackets, trunking, access, electrical work, condensate route and
+              overall install difficulty.
             </p>
           </div>
         </div>
@@ -358,4 +478,29 @@ const inputStyle = {
   border: "1px solid #c8ced8",
   boxSizing: "border-box",
   fontSize: "16px",
+};
+
+const textAreaStyle = {
+  width: "100%",
+  padding: "14px",
+  marginTop: "8px",
+  marginBottom: "18px",
+  borderRadius: "14px",
+  border: "1px solid #c8ced8",
+  boxSizing: "border-box",
+  fontSize: "16px",
+  resize: "vertical",
+  fontFamily: "Arial, sans-serif",
+};
+
+const buttonStyle = {
+  width: "100%",
+  background: "#0b2e73",
+  color: "white",
+  border: "none",
+  borderRadius: "12px",
+  padding: "14px 16px",
+  fontSize: "16px",
+  fontWeight: 700,
+  cursor: "pointer",
 };
