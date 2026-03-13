@@ -1078,16 +1078,22 @@ const customerEstimate = useMemo(() => {
     </div>
 
     <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#dbeafe",
-        color: "#1d4ed8",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
+     {selectedCustomerSystem === "midea" && (
+  <p
+    style={{
+      display: "inline-block",
+      margin: "0 0 10px 8px",
+      padding: "6px 10px",
+      borderRadius: "999px",
+      background: "#16a34a",
+      color: "white",
+      fontSize: "12px",
+      fontWeight: 700,
+    }}
+  >
+    ✓ Selected
+  </p>
+)}
     >
       Budget
     </p>
@@ -1153,16 +1159,22 @@ const customerEstimate = useMemo(() => {
     </div>
 
     <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#dbeafe",
-        color: "#1d4ed8",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
+      {selectedCustomerSystem === "mitsubishi" && (
+  <p
+    style={{
+      display: "inline-block",
+      margin: "0 0 10px 8px",
+      padding: "6px 10px",
+      borderRadius: "999px",
+      background: "#16a34a",
+      color: "white",
+      fontSize: "12px",
+      fontWeight: 700,
+    }}
+  >
+    ✓ Selected
+  </p>
+)}
     >
       Standard
     </p>
@@ -1244,16 +1256,28 @@ const customerEstimate = useMemo(() => {
     </div>
 
     <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#ede9fe",
-        color: "#6d28d9",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
+      {selectedCustomerSystem === "mitsubishi" && (
+  <p
+    {selectedCustomerSystem === "zen" && (
+  <p
+    style={{
+      display: "inline-block",
+      margin: "0 0 10px 8px",
+      padding: "6px 10px",
+      borderRadius: "999px",
+      background: "#16a34a",
+      color: "white",
+      fontSize: "12px",
+      fontWeight: 700,
+    }}
+  >
+    ✓ Selected
+  </p>
+)}
+  >
+    ✓ Selected
+  </p>
+)}
     >
       Premium
     </p>
