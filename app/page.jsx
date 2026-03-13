@@ -721,7 +721,20 @@ const customerEstimate = useMemo(() => {
       console.error("Copy failed", error);
     }
   };
+const systemNames = {
+  midea: "Midea Solstice",
+  mitsubishi: "Mitsubishi Electric AY",
+  zen: "Mitsubishi Electric Zen",
+};
 
+const roomBreakdown = customerRooms
+  .map(
+    (room, index) =>
+      `${index + 1}. ${room.name || "Room"} – ${
+        room.recommendedCapacity || room.capacity || "N/A"
+      } kW`
+  )
+  .join("\n");
   return (
     <div
       style={{
@@ -1326,20 +1339,6 @@ const customerEstimate = useMemo(() => {
     </p>
   </div>
 </div>
-  const roomBreakdown = customerRooms
-  .map(
-    (room, index) =>
-      `${index + 1}. ${room.name || "Room"} – ${
-        room.recommendedCapacity || room.capacity || "N/A"
-      } kW`
-  )
-  .join("\n");
-
-const systemNames = {
-  midea: "Midea Solstice",
-  mitsubishi: "Mitsubishi Electric AY",
-  zen: "Mitsubishi Electric Zen",
-};
 <a
   href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
 
