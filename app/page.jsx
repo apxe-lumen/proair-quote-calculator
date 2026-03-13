@@ -1169,7 +1169,7 @@ const customerEstimate = useMemo(() => {
       />
     </div>
 
-      {selectedCustomerSystem === "mitsubishi" && (
+   {selectedCustomerSystem === "mitsubishi" && (
   <p
     style={{
       display: "inline-block",
@@ -1185,22 +1185,34 @@ const customerEstimate = useMemo(() => {
     ✓ Selected
   </p>
 )}
-    >
-      Standard
-    </p>
+
+<p
+  style={{
+    display: "inline-block",
+    margin: "0 0 10px 0",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    background: "#dbeafe",
+    color: "#1d4ed8",
+    fontSize: "12px",
+    fontWeight: 700,
+  }}
+>
+  Standard
+</p>
 
     <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 8px",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#0b2e73",
-        color: "white",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
+  style={{
+    display: "inline-block",
+    margin: "0 0 10px 0",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    background: "#dbeafe",
+    color: "#1d4ed8",
+    fontSize: "12px",
+    fontWeight: 700,
+  }}
+>
       Most Popular
     </p>
 
@@ -1282,13 +1294,21 @@ const customerEstimate = useMemo(() => {
     ✓ Selected
   </p>
 )}
-  >
-    ✓ Selected
-  </p>
-)}
-    >
-      Premium
-    </p>
+
+<p
+  style={{
+    display: "inline-block",
+    margin: "0 0 10px 0",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    background: "#ede9fe",
+    color: "#6d28d9",
+    fontSize: "12px",
+    fontWeight: 700,
+  }}
+>
+  Premium
+</p>
 
     <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Zen</h3>
 
