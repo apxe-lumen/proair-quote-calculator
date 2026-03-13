@@ -659,7 +659,40 @@ export default function Page() {
 
     return lines.join("\n");
   }, [brandPreference, result]);
+const customerEstimate = useMemo(() => {
+  const roomResults = customerRooms.map(calculateRoom)
 
+  const totalLoad = roomResults.reduce((sum, r) => sum + Number(r.kw), 0)
+
+  const totalRecommended = roomResults.reduce(
+    (sum, r) => sum + Number(r.recommendedNumber),
+    0
+  )
+
+  const mideaTotal = roomResults.reduce(
+    (sum, r) => sum + getUnitPrice("midea", r.recommendedNumber),
+    0
+  )
+
+  const mitsubishiTotal = roomResults.reduce(
+    (sum, r) => sum + getUnitPrice("mitsubishi", r.recommendedNumber),
+    0
+  )
+
+  const zenTotal = roomResults.reduce((sum, r) => {
+    const price = getUnitPrice("zen", r.recommendedNumber)
+    return price ? sum + price : sum
+  }, 0)
+
+  return {
+    totalLoad: totalLoad.toFixed(2),
+    totalRecommended: totalRecommended.toFixed(1),
+    mideaTotal,
+    mitsubishiTotal,
+    zenTotal,
+    roomResults,
+  }
+}, [customerRooms])
   const customerRoomSummary = useMemo(() => {
     const lines = customerRooms.map((room, index) => {
       return `${index + 1}. ${room.name}: ${room.length}m x ${room.width}m x ${room.height}m | Room type: ${room.roomType} | Glazing: ${room.glazing} | Sun exposure: ${room.exposure} | Floor: ${getFloorLabel(room.floorLevel)} | Outdoor position: ${getOutdoorSideLabel(room.outdoorSide)}`;
@@ -980,6 +1013,28 @@ export default function Page() {
 
               <label>Anything else we should know?</label>
               <textarea
+                <div style={{
+  background:"#e9edf3",
+  borderRadius:"14px",
+  padding:"18px",
+  marginBottom:"20px"
+}}>
+  <h3 style={{marginTop:0}}>Guide estimate</h3>
+
+  <p><strong>Total estimated cooling load:</strong> {customerEstimate.totalLoad} kW</p>
+
+  <p><strong>Midea system guide price:</strong> £{customerEstimate.mideaTotal.toLocaleString()}</p>
+
+  <p><strong>Mitsubishi Electric guide price:</strong> £{customerEstimate.mitsubishiTotal.toLocaleString()}</p>
+
+  {customerEstimate.zenTotal > 0 && (
+    <p><strong>Mitsubishi Zen premium guide price:</strong> £{customerEstimate.zenTotal.toLocaleString()}</p>
+  )}
+
+  <p style={{fontSize:"13px",color:"#475569"}}>
+    Guide price only. Final cost depends on pipe runs, electrics, access and installation layout.
+  </p>
+</div>
                 name="Customer notes"
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
