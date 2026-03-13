@@ -1033,7 +1033,12 @@ const customerEstimate = useMemo(() => {
   }}
 >
   <div
-  onClick={() => setSelectedCustomerSystem("midea")}
+  onClick={() => {
+  setSelectedCustomerSystem("midea");
+  document
+    .getElementById("customer-form-start")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}}
   style={{
     background: "#e9edf3",
     borderRadius: "16px",
@@ -1103,7 +1108,12 @@ const customerEstimate = useMemo(() => {
   </div>
 
   <div
-  onClick={() => setSelectedCustomerSystem("mitsubishi")}
+  onClick={() => {
+  setSelectedCustomerSystem("mitsubishi");
+  document
+    .getElementById("customer-form-start")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}}
   style={{
     background: "#e9edf3",
     borderRadius: "16px",
@@ -1188,7 +1198,12 @@ const customerEstimate = useMemo(() => {
   </div>
 
   <div
-  onClick={() => setSelectedCustomerSystem("zen")}
+  onClick={() => {
+  setSelectedCustomerSystem("mitsubishi");
+  document
+    .getElementById("customer-form-start")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}}
   style={{
     background: "#e9edf3",
     borderRadius: "16px",
