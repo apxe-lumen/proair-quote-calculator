@@ -1417,8 +1417,6 @@ Can I get a quote / site survey please?`)}`}
     </p>
   </div>
 
-</div>
-
 <button type="submit" style={buttonStyle}>
   Send estimate request
 </button>
