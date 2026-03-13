@@ -1326,14 +1326,14 @@ const customerEstimate = useMemo(() => {
     </p>
   </div>
 </div>
-  <a
+ <a
   href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
 
 Selected system: ${selectedCustomerSystem}
 
 Estimated cooling load: ${customerEstimate.totalLoad} kW
 
-Can I get a quote / site survey please?`)}`
+Can I get a quote / site survey please?`)}`}
   target="_blank"
   rel="noreferrer"
   style={{
@@ -1350,7 +1350,6 @@ Can I get a quote / site survey please?`)}`
 >
   Send this estimate on WhatsApp
 </a>
-
 <p>
   <strong>Total estimated cooling load:</strong>{" "}
   {customerEstimate.totalLoad} kW
