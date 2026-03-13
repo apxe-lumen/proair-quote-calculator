@@ -1354,8 +1354,8 @@ const roomBreakdown = customerRooms
   </div>
 </div>
 
-    <a
-      href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
+   <a
+  href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
 
 Selected system: ${systemNames[selectedCustomerSystem]}
 Number of rooms: ${customerRooms.length}
@@ -1364,30 +1364,30 @@ ${roomBreakdown}
 Estimated cooling load: ${customerEstimate.totalLoad} kW
 Suggested total capacity: ${customerEstimate.totalRecommended} kW
 Guide price: ${
-        selectedCustomerSystem === "midea"
-          ? `£${customerEstimate.mideaTotal.toLocaleString()}`
-          : selectedCustomerSystem === "zen"
-          ? `£${customerEstimate.zenTotal.toLocaleString()}`
-          : `£${customerEstimate.mitsubishiTotal.toLocaleString()}`
-      }
+    selectedCustomerSystem === "midea"
+      ? `£${customerEstimate.mideaTotal.toLocaleString()}`
+      : selectedCustomerSystem === "zen"
+      ? `£${customerEstimate.zenTotal.toLocaleString()}`
+      : `£${customerEstimate.mitsubishiTotal.toLocaleString()}`
+  }
 
 Can I get a quote / site survey please?`)}`}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        display: "inline-block",
-        marginTop: "16px",
-        marginBottom: "20px",
-        background: "#25D366",
-        color: "white",
-        textDecoration: "none",
-        padding: "12px 18px",
-        borderRadius: "12px",
-        fontWeight: 700,
-      }}
-    >
-      Send this estimate on WhatsApp
-    </a>
+  target="_blank"
+  rel="noreferrer"
+  style={{
+    display: "inline-block",
+    marginTop: "16px",
+    marginBottom: "20px",
+    background: "#25D366",
+    color: "white",
+    textDecoration: "none",
+    padding: "12px 18px",
+    borderRadius: "12px",
+    fontWeight: 700,
+  }}
+>
+  Send this estimate on WhatsApp
+</a>
 
     <p>
       <strong>Total estimated cooling load:</strong>{" "}
