@@ -1058,7 +1058,6 @@ const roomBreakdown = customerRooms
         marginBottom: "20px",
       }}
     >
-      {/* KEEP YOUR 3 CARDS HERE EXACTLY AS THEY ALREADY WORK */}
 
       <div
         onClick={() => {
