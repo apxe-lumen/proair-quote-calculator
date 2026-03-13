@@ -1326,12 +1326,20 @@ const customerEstimate = useMemo(() => {
     </p>
   </div>
 </div>
- <a
+<a
   href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
 
 Selected system: ${selectedCustomerSystem}
-
+Number of rooms: ${customerRooms.length}
 Estimated cooling load: ${customerEstimate.totalLoad} kW
+Suggested total capacity: ${customerEstimate.totalRecommended} kW
+Guide price: ${
+  selectedCustomerSystem === "midea"
+    ? `£${customerEstimate.mideaTotal.toLocaleString()}`
+    : selectedCustomerSystem === "zen"
+    ? `£${customerEstimate.zenTotal.toLocaleString()}`
+    : `£${customerEstimate.mitsubishiTotal.toLocaleString()}`
+}
 
 Can I get a quote / site survey please?`)}`}
   target="_blank"
