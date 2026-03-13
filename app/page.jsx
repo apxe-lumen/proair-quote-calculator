@@ -728,12 +728,10 @@ const systemNames = {
 };
 
 const roomBreakdown = customerRooms
-  .map(
-    (room, index) =>
-      `${index + 1}. ${room.name || "Room"} – ${
-        room.recommendedCapacity || room.capacity || "N/A"
-      } kW`
-  )
+  .map((room, index) => {
+    const result = calculateRoom(room);
+    return `${index + 1}. ${room.name || "Room"} – ${result.recommended} kW`;
+  })
   .join("\n");
   return (
     <div
