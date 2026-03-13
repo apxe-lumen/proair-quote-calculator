@@ -1042,7 +1042,6 @@ const customerEstimate = useMemo(() => {
         marginBottom: "14px",
       }}
     >
-      Midea Image
     </div>
 
     <p
