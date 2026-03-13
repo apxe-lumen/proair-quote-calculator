@@ -790,7 +790,6 @@ const roomBreakdown = customerRooms
           </button>
         </div>
 
-        <>
           <div
             style={{
               background: "#f3f3f3",
@@ -1433,13 +1432,13 @@ Can I get a quote / site survey please?`)}`}
     Enter your contact details above to unlock system recommendations and guide pricing.
   </div>
 )}
-    <button type="submit" style={buttonStyle}>
+
+<button type="submit" style={buttonStyle}>
   Send estimate request
 </button>
 
 </form>
 </div>
-</>
 );
 }
 
