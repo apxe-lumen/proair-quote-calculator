@@ -1351,10 +1351,10 @@ const roomBreakdown = customerRooms
     <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
       Premium look and feel.
     </p>
-  </div>
+</div>
 </div>
 
-   <a
+<a
   href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
 
 Selected system: ${systemNames[selectedCustomerSystem]}
@@ -1389,32 +1389,33 @@ Can I get a quote / site survey please?`)}`}
   Send this estimate on WhatsApp
 </a>
 
-    <p>
-      <strong>Total estimated cooling load:</strong>{" "}
-      {customerEstimate.totalLoad} kW
-    </p>
+<p>
+  <strong>Total estimated cooling load:</strong>{" "}
+  {customerEstimate.totalLoad} kW
+</p>
 
-    <p>
-      <strong>Midea system guide price:</strong> £
-      {customerEstimate.mideaTotal.toLocaleString()}
-    </p>
+<p>
+  <strong>Midea system guide price:</strong> £
+  {customerEstimate.mideaTotal.toLocaleString()}
+</p>
 
-    <p>
-      <strong>Mitsubishi Electric guide price:</strong> £
-      {customerEstimate.mitsubishiTotal.toLocaleString()}
-    </p>
+<p>
+  <strong>Mitsubishi Electric guide price:</strong> £
+  {customerEstimate.mitsubishiTotal.toLocaleString()}
+</p>
 
-    {customerEstimate.zenTotal > 0 && (
-      <p>
-        <strong>Mitsubishi Zen premium guide price:</strong> £
-        {customerEstimate.zenTotal.toLocaleString()}
-      </p>
-    )}
+{customerEstimate.zenTotal > 0 && (
+  <p>
+    <strong>Mitsubishi Zen premium guide price:</strong> £
+    {customerEstimate.zenTotal.toLocaleString()}
+  </p>
+)}
 
-    <p style={{ fontSize: "13px", color: "#475569" }}>
-      Guide price only. Final cost depends on pipe runs, electrics, access and
-      installation layout.
-    </p>
+<p style={{ fontSize: "13px", color: "#475569" }}>
+  Guide price only. Final cost depends on pipe runs, electrics, access and
+  installation layout.
+</p>
+
   </>
 ) : (
   <div
