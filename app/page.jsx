@@ -8,38 +8,47 @@ const wallModelMap = {
   2.0: {
     mitsubishi: "MSZ-AY20VGKP",
     midea: "Xtreme Save Lite 2.0kW",
+    zen: "Not available in Zen range",
   },
   2.5: {
     mitsubishi: "MSZ-AY25VGKP",
     midea: "Solstice 2.6kW",
+    zen: "MSZ-EF25VGK",
   },
   3.5: {
     mitsubishi: "MSZ-AY35VGKP",
     midea: "Solstice 3.5kW",
+    zen: "MSZ-EF35VGK",
   },
   4.2: {
     mitsubishi: "MSZ-AP42VGKP",
     midea: "Solstice 5.0kW",
+    zen: "MSZ-EF50VGK",
   },
   5.0: {
     mitsubishi: "MSZ-AP50VGKP",
     midea: "Solstice 5.0kW",
+    zen: "MSZ-EF50VGK",
   },
   6.0: {
     mitsubishi: "MSZ-AP60VGKP",
     midea: "Solstice 7.0kW",
+    zen: "Not available in Zen range",
   },
   7.1: {
     mitsubishi: "MSZ-AP71VGKP",
     midea: "Solstice 7.0kW",
+    zen: "Not available in Zen range",
   },
   8.5: {
     mitsubishi: "Larger wall split / alternative system required",
     midea: "Larger wall split / alternative system required",
+    zen: "Not available in Zen range",
   },
   10.0: {
     mitsubishi: "Larger wall split / alternative system required",
     midea: "Larger wall split / alternative system required",
+    zen: "Not available in Zen range",
   },
 };
 
@@ -47,38 +56,47 @@ const cassetteModelMap = {
   2.0: {
     mitsubishi: "PLA-M25EA cassette",
     midea: "Compact cassette 2.6kW",
+    zen: "Not available in Zen range",
   },
   2.5: {
     mitsubishi: "PLA-M25EA cassette",
     midea: "Compact cassette 2.6kW",
+    zen: "Not available in Zen range",
   },
   3.5: {
     mitsubishi: "PLA-M35EA cassette",
     midea: "Cassette 3.5kW",
+    zen: "Not available in Zen range",
   },
   4.2: {
     mitsubishi: "PLA-M42EA cassette",
     midea: "Cassette 5.0kW",
+    zen: "Not available in Zen range",
   },
   5.0: {
     mitsubishi: "PLA-M50EA cassette",
     midea: "Cassette 5.0kW",
+    zen: "Not available in Zen range",
   },
   6.0: {
     mitsubishi: "PLA-M60EA cassette",
     midea: "Cassette 7.0kW",
+    zen: "Not available in Zen range",
   },
   7.1: {
     mitsubishi: "PLA-M71EA cassette",
     midea: "Cassette 7.0kW",
+    zen: "Not available in Zen range",
   },
   8.5: {
     mitsubishi: "PLA / larger cassette system",
     midea: "Larger cassette system",
+    zen: "Not available in Zen range",
   },
   10.0: {
     mitsubishi: "Larger cassette system",
     midea: "Larger cassette system",
+    zen: "Not available in Zen range",
   },
 };
 
@@ -86,38 +104,47 @@ const ductedModelMap = {
   2.0: {
     mitsubishi: "PEAD-M25 ducted",
     midea: "Slim duct 2.6kW",
+    zen: "Not available in Zen range",
   },
   2.5: {
     mitsubishi: "PEAD-M25 ducted",
     midea: "Slim duct 2.6kW",
+    zen: "Not available in Zen range",
   },
   3.5: {
     mitsubishi: "PEAD-M35 ducted",
     midea: "Slim duct 3.5kW",
+    zen: "Not available in Zen range",
   },
   4.2: {
     mitsubishi: "PEAD-M42 ducted",
     midea: "Ducted 5.0kW",
+    zen: "Not available in Zen range",
   },
   5.0: {
     mitsubishi: "PEAD-M50 ducted",
     midea: "Ducted 5.0kW",
+    zen: "Not available in Zen range",
   },
   6.0: {
     mitsubishi: "PEAD-M60 ducted",
     midea: "Ducted 7.0kW",
+    zen: "Not available in Zen range",
   },
   7.1: {
     mitsubishi: "PEAD-M71 ducted",
     midea: "Ducted 7.0kW",
+    zen: "Not available in Zen range",
   },
   8.5: {
     mitsubishi: "Larger ducted system",
     midea: "Larger ducted system",
+    zen: "Not available in Zen range",
   },
   10.0: {
     mitsubishi: "Larger ducted system",
     midea: "Larger ducted system",
+    zen: "Not available in Zen range",
   },
 };
 
@@ -131,6 +158,8 @@ const defaultRoom = {
   glazing: "medium",
   exposure: "south",
   pipeRun: "standard",
+  floorLevel: "ground",
+  outdoorSide: "same_side",
 };
 
 function roundToRecommendedSize(kw) {
@@ -146,6 +175,12 @@ function getUnitPrice(brand, size) {
     if (size <= 5.0) return 2400;
     if (size <= 7.1) return 3000;
     return 3500;
+  }
+
+  if (brand === "zen") {
+    if (size <= 3.5) return 2400;
+    if (size <= 5.0) return 3000;
+    return null;
   }
 
   if (size <= 3.5) return 1500;
@@ -184,6 +219,20 @@ function getPipeRunLabel(pipeRun) {
   return "Up to 3m";
 }
 
+function getFloorLabel(floorLevel) {
+  if (floorLevel === "first") return "First floor";
+  if (floorLevel === "loft") return "Loft / second floor";
+  return "Ground floor";
+}
+
+function getOutdoorSideLabel(outdoorSide) {
+  if (outdoorSide === "front") return "Front of property";
+  if (outdoorSide === "rear") return "Rear of property";
+  if (outdoorSide === "side") return "Side elevation";
+  if (outdoorSide === "opposite_side") return "Opposite side of property";
+  return "Same side as room";
+}
+
 function calculateRoom(room) {
   const area = Number(room.length) * Number(room.width);
 
@@ -216,42 +265,70 @@ function calculateRoom(room) {
   };
 }
 
-function getOutdoorSuggestion(roomSpread, roomCount, totalRecommended, systemType) {
+function getOutdoorSuggestion(
+  roomSpread,
+  roomCount,
+  totalRecommended,
+  systemType,
+  outdoorPreference,
+  roomResults
+) {
+  const oppositeSideCount = roomResults.filter(
+    (room) => room.outdoorSide === "opposite_side"
+  ).length;
+  const upperFloorCount = roomResults.filter(
+    (room) => room.floorLevel === "first" || room.floorLevel === "loft"
+  ).length;
+
   if (roomCount === 1) {
     return "Single room setup. One outdoor unit is likely suitable.";
   }
 
-  if (roomSpread === "same_side") {
-    if (roomCount <= 3 && totalRecommended <= 10) {
-      return "Rooms are grouped together. A single outdoor unit or multi-split may be suitable depending on pipe routes and manufacturer limits.";
-    }
-    return "Rooms are grouped together, but total load is climbing. Compare a multi-split against multiple single splits.";
+  if (outdoorPreference === "single" && roomCount > 2 && oppositeSideCount > 0) {
+    return "A single outdoor unit is possible, but with rooms spread around the property it may create longer pipe runs and more visible trunking.";
   }
 
-  if (roomSpread === "adjacent") {
-    return "Rooms are close together. A single outdoor unit could work well, but still sense-check trunking routes and condensate runs.";
+  if (outdoorPreference === "multiple") {
+    return "Customer is happy with more than one outdoor unit. Compare separate systems to reduce pipe run and keep the install neater.";
   }
 
-  if (roomSpread === "opposite_sides") {
-    return "Rooms are on opposite sides of the property. Consider outdoor units on each side to reduce long pipe runs and visible trunking.";
+  if (roomSpread === "opposite_sides" || oppositeSideCount >= 2) {
+    return "Rooms are split across opposite sides of the property. Consider one outdoor unit per side to reduce long pipe runs and installation mess.";
   }
 
-  if (roomSpread === "different_floors") {
-    return "Rooms are on different floors. Review outdoor locations carefully, as two outdoor units may give a neater install and simpler condensate routing.";
+  if (roomSpread === "different_floors" || upperFloorCount >= 2) {
+    return "Rooms are across different floors. Review outdoor positions carefully, as two outdoor units may give a cleaner route and easier condensate management.";
   }
 
   if (roomSpread === "spread_out") {
-    return "Rooms appear spread across the property. Two outdoor units or separate systems may be the cleaner option over one heavily stretched multi-split.";
+    return "Rooms are spread across the property. Multiple outdoor units may be cleaner than stretching one multi-split too far.";
+  }
+
+  if (roomSpread === "same_side") {
+    if (roomCount <= 3 && totalRecommended <= 10) {
+      return "Rooms are grouped on the same side. A single outdoor unit or multi-split may work well, subject to manufacturer pipe limits.";
+    }
+    return "Rooms are grouped together, but total load is rising. Compare a multi-split against multiple single splits.";
+  }
+
+  if (roomSpread === "adjacent") {
+    return "Rooms are close together. A single outdoor unit could work well, but still sense-check trunking routes and condensate paths.";
   }
 
   if (systemType === "ducted") {
-    return "Ducted systems are very layout-sensitive. Check route, static pressure, returns and outdoor position before committing.";
+    return "Ducted systems are layout-sensitive. Check route, returns, static pressure and outdoor position before deciding on one or more condensers.";
   }
 
   return "Review outdoor locations on site to balance pipe length, access, aesthetics and future serviceability.";
 }
 
-function getSystemOptions(totalRecommended, roomCount, roomSpread, systemType) {
+function getSystemOptions(
+  totalRecommended,
+  roomCount,
+  roomSpread,
+  systemType,
+  outdoorPreference
+) {
   const options = [];
 
   if (roomCount === 1) {
@@ -261,14 +338,17 @@ function getSystemOptions(totalRecommended, roomCount, roomSpread, systemType) {
 
   options.push(`${roomCount} x single split systems`);
 
-  if (roomCount <= 3 && totalRecommended <= 12) {
-    options.push(`1 x multi-split system around ${Math.ceil(totalRecommended)}kW total connected load, subject to layout and pipe runs`);
+  if (roomCount <= 3 && totalRecommended <= 12 && outdoorPreference !== "multiple") {
+    options.push(
+      `1 x multi-split system around ${Math.ceil(totalRecommended)}kW total connected load, subject to layout and pipe runs`
+    );
   }
 
   if (
     roomSpread === "opposite_sides" ||
     roomSpread === "different_floors" ||
-    roomSpread === "spread_out"
+    roomSpread === "spread_out" ||
+    outdoorPreference === "multiple"
   ) {
     options.push("Consider 2 outdoor units to reduce long runs and installation complexity");
   }
@@ -285,8 +365,10 @@ export default function Page() {
   const [brandPreference, setBrandPreference] = useState("both");
   const [systemType, setSystemType] = useState("wall");
   const [roomSpread, setRoomSpread] = useState("same_side");
+  const [outdoorPreference, setOutdoorPreference] = useState("best_layout");
   const [notes, setNotes] = useState("");
   const [copied, setCopied] = useState(false);
+  const [quoteCopied, setQuoteCopied] = useState(false);
 
   const updateRoom = (id, field, value) => {
     setRooms((prev) =>
@@ -326,6 +408,7 @@ export default function Page() {
       const models = selectedMap[room.recommendedNumber] || {
         mitsubishi: "No model mapped",
         midea: "No model mapped",
+        zen: "Not available in Zen range",
       };
 
       const pipeRunExtra = getPipeRunExtra(room.pipeRun);
@@ -334,14 +417,22 @@ export default function Page() {
       const mideaUnitPrice =
         getUnitPrice("midea", room.recommendedNumber) + pipeRunExtra;
 
+      const zenBase = getUnitPrice("zen", room.recommendedNumber);
+      const zenUnitPrice =
+        zenBase === null ? null : zenBase + pipeRunExtra;
+
       return {
         ...room,
         mitsubishi: models.mitsubishi,
         midea: models.midea,
+        zen: models.zen,
         pipeRunLabel: getPipeRunLabel(room.pipeRun),
+        floorLabel: getFloorLabel(room.floorLevel),
+        outdoorSideLabel: getOutdoorSideLabel(room.outdoorSide),
         pipeRunExtra,
         mitsubishiUnitPrice,
         mideaUnitPrice,
+        zenUnitPrice,
       };
     });
 
@@ -353,6 +444,11 @@ export default function Page() {
       (sum, room) => sum + room.mideaUnitPrice,
       0
     );
+    const zenAvailableRooms = groupedModels.filter((room) => room.zenUnitPrice !== null);
+    const zenTotal = zenAvailableRooms.reduce(
+      (sum, room) => sum + room.zenUnitPrice,
+      0
+    );
 
     return {
       roomResults: groupedModels,
@@ -361,20 +457,25 @@ export default function Page() {
       systemLabel: getSystemLabel(systemType),
       mitsubishiTotal,
       mideaTotal,
+      zenTotal,
+      zenAvailableRooms,
       outdoorSuggestion: getOutdoorSuggestion(
         roomSpread,
         groupedModels.length,
         totalRecommended,
-        systemType
+        systemType,
+        outdoorPreference,
+        groupedModels
       ),
       systemOptions: getSystemOptions(
         totalRecommended,
         groupedModels.length,
         roomSpread,
-        systemType
+        systemType,
+        outdoorPreference
       ),
     };
-  }, [rooms, systemType, roomSpread]);
+  }, [rooms, systemType, roomSpread, outdoorPreference]);
 
   const summary = useMemo(() => {
     const lines = [
@@ -382,13 +483,14 @@ export default function Page() {
       "",
       `System type: ${result.systemLabel}`,
       `Room spread: ${roomSpread.replaceAll("_", " ")}`,
+      `Outdoor preference: ${outdoorPreference.replaceAll("_", " ")}`,
       "",
       "Room breakdown",
     ];
 
     result.roomResults.forEach((room, index) => {
       lines.push(
-        `${index + 1}. ${room.name}: ${room.length}m x ${room.width}m x ${room.height}m | ${room.area}m² | Load ${room.kw}kW | Suggested ${room.recommended}kW | Pipe run ${room.pipeRunLabel}`
+        `${index + 1}. ${room.name}: ${room.length}m x ${room.width}m x ${room.height}m | ${room.area}m² | Load ${room.kw}kW | Suggested ${room.recommended}kW | ${room.floorLabel} | Outdoor ${room.outdoorSideLabel} | Pipe run ${room.pipeRunLabel}`
       );
     });
 
@@ -425,6 +527,23 @@ export default function Page() {
       lines.push("");
     }
 
+    if (brandPreference === "both" || brandPreference === "zen") {
+      lines.push("Mitsubishi Zen premium upgrade");
+      result.roomResults.forEach((room) => {
+        if (room.zenUnitPrice !== null) {
+          lines.push(
+            `${room.name}: ${room.zen} | Estimated installed price ${formatPrice(room.zenUnitPrice)}`
+          );
+        } else {
+          lines.push(`${room.name}: Zen not available for this size`);
+        }
+      });
+      if (result.zenAvailableRooms.length > 0) {
+        lines.push(`Estimated installed total: ${formatPrice(result.zenTotal)}`);
+      }
+      lines.push("");
+    }
+
     if (notes.trim()) {
       lines.push("Survey notes");
       lines.push(notes.trim());
@@ -436,13 +555,86 @@ export default function Page() {
     );
 
     return lines.join("\n");
-  }, [brandPreference, notes, result, roomSpread]);
+  }, [brandPreference, notes, result, roomSpread, outdoorPreference]);
+
+  const whatsappQuote = useMemo(() => {
+    const lines = [
+      "Hi 👋",
+      "",
+      "Based on the room sizes and layout, we’d recommend the following setup:",
+      "",
+    ];
+
+    result.roomResults.forEach((room) => {
+      lines.push(`• ${room.name}: ${room.recommended}kW ${result.systemLabel.toLowerCase()}`);
+    });
+
+    lines.push("");
+    lines.push(`Total estimated cooling load: ${result.totalLoad}kW`);
+    lines.push(`Outdoor unit layout note: ${result.outdoorSuggestion}`);
+    lines.push("");
+
+    if (brandPreference === "mitsubishi") {
+      lines.push("Suggested Mitsubishi Electric models:");
+      result.roomResults.forEach((room) => {
+        lines.push(`• ${room.name}: ${room.mitsubishi}`);
+      });
+      lines.push("");
+      lines.push(`Estimated installed price: ${formatPrice(result.mitsubishiTotal)}`);
+    } else if (brandPreference === "midea") {
+      lines.push("Suggested Midea models:");
+      result.roomResults.forEach((room) => {
+        lines.push(`• ${room.name}: ${room.midea}`);
+      });
+      lines.push("");
+      lines.push(`Estimated installed price: ${formatPrice(result.mideaTotal)}`);
+    } else if (brandPreference === "zen") {
+      lines.push("Suggested Mitsubishi Zen premium options:");
+      result.roomResults.forEach((room) => {
+        if (room.zenUnitPrice !== null) {
+          lines.push(`• ${room.name}: ${room.zen}`);
+        } else {
+          lines.push(`• ${room.name}: Zen not available for this size`);
+        }
+      });
+      if (result.zenAvailableRooms.length > 0) {
+        lines.push("");
+        lines.push(`Estimated installed price: ${formatPrice(result.zenTotal)}`);
+      }
+    } else {
+      lines.push("Example options:");
+      lines.push(`• Mitsubishi Electric total: ${formatPrice(result.mitsubishiTotal)}`);
+      lines.push(`• Midea total: ${formatPrice(result.mideaTotal)}`);
+      if (result.zenAvailableRooms.length > 0) {
+        lines.push(`• Mitsubishi Zen premium total: ${formatPrice(result.zenTotal)}`);
+      }
+    }
+
+    lines.push("");
+    lines.push(
+      "Guide prices only. Final price depends on pipe runs, access, electrical work and final installation layout."
+    );
+    lines.push("");
+    lines.push("Happy to answer any questions 👍");
+
+    return lines.join("\n");
+  }, [brandPreference, result]);
 
   const handleCopySummary = async () => {
     try {
       await navigator.clipboard.writeText(summary);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Copy failed", error);
+    }
+  };
+
+  const handleCopyWhatsAppQuote = async () => {
+    try {
+      await navigator.clipboard.writeText(whatsappQuote);
+      setQuoteCopied(true);
+      setTimeout(() => setQuoteCopied(false), 2000);
     } catch (error) {
       console.error("Copy failed", error);
     }
@@ -458,7 +650,7 @@ export default function Page() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ maxWidth: "1380px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1480px", margin: "0 auto" }}>
         <div style={{ marginBottom: "24px" }}>
           <h1 style={{ margin: 0, fontSize: "42px", fontWeight: 700 }}>
             <span style={{ color: "#666a73" }}>PRO</span>
@@ -616,16 +808,51 @@ export default function Page() {
                   </div>
                 </div>
 
-                <label>Estimated pipe run</label>
+                <div style={twoColGridStyle}>
+                  <div>
+                    <label>Estimated pipe run</label>
+                    <select
+                      value={room.pipeRun}
+                      onChange={(e) =>
+                        updateRoom(room.id, "pipeRun", e.target.value)
+                      }
+                      style={inputStyle}
+                    >
+                      <option value="standard">Up to 3m</option>
+                      <option value="medium">3m to 5m</option>
+                      <option value="long">5m to 7m</option>
+                      <option value="very_long">7m+</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Floor level</label>
+                    <select
+                      value={room.floorLevel}
+                      onChange={(e) =>
+                        updateRoom(room.id, "floorLevel", e.target.value)
+                      }
+                      style={inputStyle}
+                    >
+                      <option value="ground">Ground floor</option>
+                      <option value="first">First floor</option>
+                      <option value="loft">Loft / second floor</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label>Outdoor unit side / likely position</label>
                 <select
-                  value={room.pipeRun}
-                  onChange={(e) => updateRoom(room.id, "pipeRun", e.target.value)}
+                  value={room.outdoorSide}
+                  onChange={(e) =>
+                    updateRoom(room.id, "outdoorSide", e.target.value)
+                  }
                   style={inputStyle}
                 >
-                  <option value="standard">Up to 3m</option>
-                  <option value="medium">3m to 5m</option>
-                  <option value="long">5m to 7m</option>
-                  <option value="very_long">7m+</option>
+                  <option value="same_side">Same side as room</option>
+                  <option value="front">Front of property</option>
+                  <option value="rear">Rear of property</option>
+                  <option value="side">Side elevation</option>
+                  <option value="opposite_side">Opposite side of property</option>
                 </select>
               </div>
             ))}
@@ -645,15 +872,16 @@ export default function Page() {
               <option value="ducted">Ducted</option>
             </select>
 
-            <label>Preferred brand</label>
+            <label>Preferred brand / quote mode</label>
             <select
               value={brandPreference}
               onChange={(e) => setBrandPreference(e.target.value)}
               style={inputStyle}
             >
-              <option value="both">Show both</option>
+              <option value="both">Show both standard options</option>
               <option value="mitsubishi">Mitsubishi Electric only</option>
               <option value="midea">Midea only</option>
+              <option value="zen">Mitsubishi Zen premium upgrade</option>
             </select>
 
             <label>Room spread / property layout</label>
@@ -667,6 +895,17 @@ export default function Page() {
               <option value="opposite_sides">Opposite sides of house</option>
               <option value="different_floors">Different floors</option>
               <option value="spread_out">Spread across property</option>
+            </select>
+
+            <label>Outdoor unit preference</label>
+            <select
+              value={outdoorPreference}
+              onChange={(e) => setOutdoorPreference(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="best_layout">Best layout wins</option>
+              <option value="single">Single outdoor preferred</option>
+              <option value="multiple">Happy with multiple outdoor units</option>
             </select>
 
             <label>Survey notes</label>
@@ -714,6 +953,9 @@ export default function Page() {
                   <p style={{ margin: 0, fontWeight: 700 }}>{room.name}</p>
                   <p style={{ margin: "6px 0 0 0" }}>
                     {room.area}m² • Load {room.kw}kW • Suggested {room.recommended}kW
+                  </p>
+                  <p style={{ margin: "6px 0 0 0", color: "#475569" }}>
+                    {room.floorLabel} • Outdoor {room.outdoorSideLabel}
                   </p>
                   <p style={{ margin: "6px 0 0 0", color: "#475569" }}>
                     Pipe run: {room.pipeRunLabel}{" "}
@@ -779,8 +1021,33 @@ export default function Page() {
               </div>
             )}
 
+            {(brandPreference === "both" || brandPreference === "zen") && (
+              <div style={resultCardStyle}>
+                <p style={{ marginTop: 0, fontWeight: 700 }}>
+                  Mitsubishi Zen premium upgrade
+                </p>
+                {result.roomResults.map((room) => (
+                  <div key={room.id} style={{ marginBottom: "10px" }}>
+                    <p style={{ margin: "0 0 4px 0" }}>
+                      <strong>{room.name}:</strong> {room.zen}
+                    </p>
+                    <p style={{ margin: 0, color: "#475569" }}>
+                      {room.zenUnitPrice !== null
+                        ? `Estimated installed price: ${formatPrice(room.zenUnitPrice)}`
+                        : "Zen not available for this size"}
+                    </p>
+                  </div>
+                ))}
+                {result.zenAvailableRooms.length > 0 && (
+                  <p style={{ marginTop: "14px", marginBottom: 0, color: "#334155" }}>
+                    Estimated installed total: {formatPrice(result.zenTotal)}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div style={resultCardStyle}>
-              <p style={{ marginTop: 0, fontWeight: 700 }}>Copy summary</p>
+              <p style={{ marginTop: 0, fontWeight: 700 }}>Copy installer summary</p>
               <pre
                 style={{
                   whiteSpace: "pre-wrap",
@@ -794,6 +1061,24 @@ export default function Page() {
               </pre>
               <button onClick={handleCopySummary} style={buttonStyle}>
                 {copied ? "Copied" : "Copy project summary"}
+              </button>
+            </div>
+
+            <div style={resultCardStyle}>
+              <p style={{ marginTop: 0, fontWeight: 700 }}>WhatsApp quote message</p>
+              <pre
+                style={{
+                  whiteSpace: "pre-wrap",
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "14px",
+                  color: "#334155",
+                  marginBottom: "14px",
+                }}
+              >
+                {whatsappQuote}
+              </pre>
+              <button onClick={handleCopyWhatsAppQuote} style={buttonStyle}>
+                {quoteCopied ? "Copied" : "Copy WhatsApp quote"}
               </button>
             </div>
 
