@@ -1022,6 +1022,28 @@ const customerEstimate = useMemo(() => {
   }}
 >
   <h3 style={{ marginTop: 0 }}>Guide estimate</h3>
+  <div
+  style={{
+    height: "160px",
+    borderRadius: "12px",
+    background: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    overflow: "hidden"
+  }}
+>
+  <img
+    src="/mitsubishi-ay.png"
+    alt="Mitsubishi Electric AY"
+    style={{
+      maxWidth: "100%",
+      maxHeight: "100%",
+      objectFit: "contain"
+    }}
+  />
+</div>
 
   <p>
     <strong>Total estimated cooling load:</strong>{" "}
