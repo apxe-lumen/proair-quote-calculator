@@ -1049,7 +1049,7 @@ const roomBreakdown = customerRooms
 <h3 style={{ marginTop: 0 }}>Recommended systems & guide price</h3>
 
 {customerDetailsComplete && (
-  <div>
+  <>
     <div
       style={{
         display: "grid",
@@ -1419,7 +1419,7 @@ Can I get a quote / site survey please?`)}`}
     <button type="submit" style={buttonStyle}>
       Send estimate request
     </button>
-  </div>
+  </>
 )}
 </form>
 </div>
