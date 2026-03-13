@@ -1015,256 +1015,40 @@ const customerEstimate = useMemo(() => {
 
 <div
   style={{
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "18px",
+    background: "#e9edf3",
+    borderRadius: "14px",
+    padding: "18px",
     marginBottom: "20px",
   }}
 >
-  <div
-    style={{
-      background: "#e9edf3",
-      borderRadius: "16px",
-      padding: "18px",
-      border: "2px solid #d6dde8",
-    }}
-  >
-    <div
-      style={{
-        height: "140px",
-        borderRadius: "12px",
-        background: "#dbe4f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 700,
-        color: "#334155",
-        marginBottom: "14px",
-      }}
-    >
-    </div>
+  <h3 style={{ marginTop: 0 }}>Guide estimate</h3>
 
-    <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#dbeafe",
-        color: "#1d4ed8",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
-  <div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "18px",
-    marginBottom: "20px",
-  }}
->
-  <div
-    style={{
-      background: "#e9edf3",
-      borderRadius: "16px",
-      padding: "18px",
-      border: "2px solid #d6dde8",
-    }}
-  >
-    <div
-      style={{
-        height: "160px",
-        borderRadius: "12px",
-        background: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: "14px",
-        overflow: "hidden",
-      }}
-    >
-      <img
-        src="/midea-solstice.png"
-        alt="Midea Solstice"
-        style={{
-          maxWidth: "100%",
-          maxHeight: "100%",
-          objectFit: "contain",
-        }}
-      />
-    </div>
+  <p>
+    <strong>Total estimated cooling load:</strong>{" "}
+    {customerEstimate.totalLoad} kW
+  </p>
 
-    <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#dbeafe",
-        color: "#1d4ed8",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
-      Budget
+  <p>
+    <strong>Midea system guide price:</strong> £
+    {customerEstimate.mideaTotal.toLocaleString()}
+  </p>
+
+  <p>
+    <strong>Mitsubishi Electric guide price:</strong> £
+    {customerEstimate.mitsubishiTotal.toLocaleString()}
+  </p>
+
+  {customerEstimate.zenTotal > 0 && (
+    <p>
+      <strong>Mitsubishi Zen premium guide price:</strong> £
+      {customerEstimate.zenTotal.toLocaleString()}
     </p>
+  )}
 
-    <h3 style={{ margin: "0 0 8px 0" }}>Midea</h3>
-
-    <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
-      Best value option for effective heating and cooling.
-    </p>
-
-    <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
-      From £{customerEstimate.mideaTotal.toLocaleString()}
-    </p>
-
-    <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-      Good budget-friendly choice.
-    </p>
-  </div>
-
-  <div
-    style={{
-      background: "#e9edf3",
-      borderRadius: "16px",
-      padding: "18px",
-      border: "2px solid #0b2e73",
-      boxShadow: "0 8px 24px rgba(11,46,115,0.12)",
-    }}
-  >
-    <div
-      style={{
-        height: "160px",
-        borderRadius: "12px",
-        background: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: "14px",
-        overflow: "hidden",
-      }}
-    >
-      <img
-        src="/mitsubishi-ay.png"
-        alt="Mitsubishi Electric AY"
-        style={{
-          maxWidth: "100%",
-          maxHeight: "100%",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-
-    <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#dbeafe",
-        color: "#1d4ed8",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
-      Standard
-    </p>
-
-    <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 8px",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#0b2e73",
-        color: "white",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
-      Most Popular
-    </p>
-
-    <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Electric</h3>
-
-    <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
-      Reliable all-round option with a more premium feel.
-    </p>
-
-    <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
-      From £{customerEstimate.mitsubishiTotal.toLocaleString()}
-    </p>
-
-    <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-      Popular balance of quality and value.
-    </p>
-  </div>
-
-  <div
-    style={{
-      background: "#e9edf3",
-      borderRadius: "16px",
-      padding: "18px",
-      border: "2px solid #d6dde8",
-      opacity: customerEstimate.zenTotal > 0 ? 1 : 0.65,
-    }}
-  >
-    <div
-      style={{
-        height: "160px",
-        borderRadius: "12px",
-        background: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: "14px",
-        overflow: "hidden",
-      }}
-    >
-      <img
-        src="/zen.jpg"
-        alt="Mitsubishi Zen"
-        style={{
-          maxWidth: "100%",
-          maxHeight: "100%",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-
-    <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#ede9fe",
-        color: "#6d28d9",
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
-      Premium
-    </p>
-
-    <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Zen</h3>
-
-    <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
-      Designer premium option for customers wanting a higher-end finish.
-    </p>
-
-    <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
-      {customerEstimate.zenTotal > 0
-        ? `From £${customerEstimate.zenTotal.toLocaleString()}`
-        : "Not available for all selected room sizes"}
-    </p>
-
-    <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-      Premium look and feel.
-    </p>
-  </div>
+  <p style={{ fontSize: "13px", color: "#475569" }}>
+    Guide price only. Final cost depends on pipe runs, electrics, access and
+    installation layout.
+  </p>
 </div>
 
 
