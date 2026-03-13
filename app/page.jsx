@@ -783,16 +783,6 @@ const roomBreakdown = customerRooms
           >
             Customer estimate form
           </button>
-          <button
-            onClick={() => setViewMode("installer")}
-            style={{
-              ...tabButtonStyle,
-              background: viewMode === "installer" ? "#0b2e73" : "#cbd5e1",
-              color: viewMode === "installer" ? "white" : "#0b1b3a",
-            }}
-          >
-            Installer tool
-          </button>
         </div>
 
         {viewMode === "customer" ? (
