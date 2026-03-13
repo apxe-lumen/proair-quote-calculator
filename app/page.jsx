@@ -1085,16 +1085,25 @@ const customerEstimate = useMemo(() => {
     }}
   >
     <div
-      style={{
-        height: "140px",
-        borderRadius: "12px",
-        background: "#dbe4f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 700,
-        color: "#334155",
-        marginBottom: "14px",
+  style={{
+    height: "160px",
+    borderRadius: "12px",
+    background: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+  }}
+>
+  <img
+    src="/midea-solstice.png"
+    style={{
+      maxWidth: "100%",
+      maxHeight: "100%",
+      objectFit: "contain"
+    }}
+  />
+</div>
       }}
     >
       Mitsubishi Image
@@ -1155,31 +1164,50 @@ const customerEstimate = useMemo(() => {
     }}
   >
     <div
-      style={{
-        height: "140px",
-        borderRadius: "12px",
-        background: "#dbe4f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 700,
-        color: "#334155",
-        marginBottom: "14px",
+  style={{
+    height: "160px",
+    borderRadius: "12px",
+    background: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+  }}
+>
+  <img
+    src="/mitsubishi-ay.png"
+    style={{
+      maxWidth: "100%",
+      maxHeight: "100%",
+      objectFit: "contain"
+    }}
+  />
+</div>
       }}
     >
       Zen Image
-    </div>
-
-    <p
-      style={{
-        display: "inline-block",
-        margin: "0 0 10px 0",
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "#ede9fe",
-        color: "#6d28d9",
-        fontSize: "12px",
-        fontWeight: 700,
+    <div
+  style={{
+    height: "160px",
+    borderRadius: "12px",
+    background: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    overflow: "hidden"
+  }}
+>
+  <img
+    src="/zen.jpg"
+    alt="Mitsubishi Zen"
+    style={{
+      maxWidth: "100%",
+      maxHeight: "100%",
+      objectFit: "contain"
+    }}
+  />
+</div>
       }}
     >
       Premium
