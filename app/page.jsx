@@ -392,6 +392,11 @@ export default function Page() {
   const [notes, setNotes] = useState("");
   const [copied, setCopied] = useState(false);
   const [quoteCopied, setQuoteCopied] = useState(false);
+const customerDetailsComplete =
+  customerName.trim() &&
+  customerPhone.trim() &&
+  customerEmail.trim() &&
+  customerPostcode.trim();
 
   const updateRoom = (id, field, value) => {
     setRooms((prev) =>
