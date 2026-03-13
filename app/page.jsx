@@ -1411,15 +1411,15 @@ Can I get a quote / site survey please?`)}`}
       </p>
     )}
 
-    <p style={{ fontSize: "13px", color: "#475569" }}>
+        <p style={{ fontSize: "13px", color: "#475569" }}>
       Guide price only. Final cost depends on pipe runs, electrics, access and
       installation layout.
     </p>
-  </div>
 
-<button type="submit" style={buttonStyle}>
-  Send estimate request
-</button>
+    <button type="submit" style={buttonStyle}>
+      Send estimate request
+    </button>
+  </div>
 ) : (
   <div
     style={{
