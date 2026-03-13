@@ -1047,7 +1047,7 @@ const roomBreakdown = customerRooms
     marginBottom: "20px",
   }}
 >
-  <h3 style={{ marginTop: 0 }}>Guide estimate</h3>
+  <h3 style={{ marginTop: 0 }}>Recommended systems & guide price</h3>
 {customerDetailsComplete ? (
 <div
   style={{
@@ -1428,7 +1428,21 @@ Can I get a quote / site survey please?`)}`}
     installation layout.
   </p>
 </div>
-
+) : (
+<div
+  style={{
+    textAlign: "center",
+    padding: "28px",
+    background: "#f1f5f9",
+    borderRadius: "12px",
+    marginBottom: "20px",
+    color: "#475569",
+    fontWeight: 500
+  }}
+>
+  Enter your contact details above to unlock system recommendations and guide pricing.
+</div>
+)}
 
               <button type="submit" style={buttonStyle}>
                 Send estimate request
