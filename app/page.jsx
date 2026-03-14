@@ -830,7 +830,7 @@ timeframe: installTimeframe
             <span style={{ color: "#0b2e73" }}>AIR</span>
           </h1>
           <p style={{ marginTop: "8px", fontSize: "20px", color: "#ffffff" }}>
-            Climate Control Survey Tool
+            Quick estimate in under 30 seconds
           </p>
         </div>
 
