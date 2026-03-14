@@ -1152,7 +1152,10 @@ const roomBreakdown = customerRooms
     {"£"}{customerEstimate.estimatedHeatingMonthly} / month
   </p>
 </div>
- {!customerDetailsComplete && (
+
+</div>   {/* closes the summary grid */}
+
+{!customerDetailsComplete && (
                   <p style={{ margin: 0, color: "#475569" }}>
                     Fill in your name, phone, email and postcode to view guide prices.
                   </p>
