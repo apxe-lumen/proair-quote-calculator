@@ -1094,6 +1094,29 @@ const roomBreakdown = customerRooms
 
                 {customerDetailsComplete && (
                   <>
+                   <div style={{ ...resultCardStyle, marginBottom: "20px" }}>
+  <h4 style={{ marginTop: 0, marginBottom: "12px" }}>
+    Recommended room sizes
+  </h4>
+
+  {customerEstimate.roomResults.map((room) => (
+    <div
+      key={room.id}
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 0",
+        borderBottom: "1px solid #d6dde8",
+      }}
+    >
+      <span style={{ fontWeight: 600 }}>{room.name}</span>
+      <span style={{ color: "#0b2e73", fontWeight: 700 }}>
+        {room.recommended} kW
+      </span>
+    </div>
+  ))}
+</div>
                     <div
                       style={{
                         display: "grid",
