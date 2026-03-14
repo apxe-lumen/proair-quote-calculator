@@ -1036,326 +1036,339 @@ const roomBreakdown = customerRooms
                 </div>
               ))}
 
-             <label>Anything else we should know?</label>
+                         <label>Anything else we should know?</label>
+              <textarea
+                name="Additional notes"
+                value={customerNotes}
+                onChange={(e) => setCustomerNotes(e.target.value)}
+                style={textAreaStyle}
+                rows={4}
+                placeholder="Access notes, preferred outdoor unit position, parking info, or anything else helpful"
+              />
 
-<div
-  style={{
-    background: "#e9edf3",
-    borderRadius: "14px",
-    padding: "18px",
-    marginBottom: "20px",
-  }}
->
-<h3 style={{ marginTop: 0 }}>Recommended systems & guide price</h3>
+              <div
+                style={{
+                  background: "#e9edf3",
+                  borderRadius: "14px",
+                  padding: "18px",
+                  marginBottom: "20px",
+                }}
+              >
+                <h3 style={{ marginTop: 0 }}>Recommended systems & guide price</h3>
 
-{customerDetailsComplete && (
-  <>
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-        gap: "18px",
-        marginBottom: "20px",
-      }}
-    >
+                {!customerDetailsComplete && (
+                  <p style={{ margin: 0, color: "#475569" }}>
+                    Fill in your name, phone, email and postcode to view guide prices.
+                  </p>
+                )}
 
-      <div
-        onClick={() => {
-          setSelectedCustomerSystem("midea");
-          document
-            .getElementById("customer-form-start")
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-        }}
-        style={{
-          background: "#e9edf3",
-          borderRadius: "16px",
-          padding: "18px",
-          border:
-            selectedCustomerSystem === "midea"
-              ? "2px solid #0b2e73"
-              : "2px solid #d6dde8",
-          boxShadow:
-            selectedCustomerSystem === "midea"
-              ? "0 8px 24px rgba(11,46,115,0.12)"
-              : "none",
-          cursor: "pointer",
-        }}
-      >
-        <div
-          style={{
-            height: "160px",
-            borderRadius: "12px",
-            background: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "14px",
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/midea-solstice.png"
-            alt="Midea Solstice"
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              objectFit: "contain",
-            }}
-          />
-        </div>
+                {customerDetailsComplete && (
+                  <>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                        gap: "18px",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <div
+                        onClick={() => {
+                          setSelectedCustomerSystem("midea");
+                          document
+                            .getElementById("customer-form-start")
+                            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }}
+                        style={{
+                          background: "#e9edf3",
+                          borderRadius: "16px",
+                          padding: "18px",
+                          border:
+                            selectedCustomerSystem === "midea"
+                              ? "2px solid #0b2e73"
+                              : "2px solid #d6dde8",
+                          boxShadow:
+                            selectedCustomerSystem === "midea"
+                              ? "0 8px 24px rgba(11,46,115,0.12)"
+                              : "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "160px",
+                            borderRadius: "12px",
+                            background: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: "14px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            src="/midea-solstice.png"
+                            alt="Midea Solstice"
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "100%",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </div>
 
-        {selectedCustomerSystem === "midea" && (
-          <p
-            style={{
-              display: "inline-block",
-              margin: "0 0 10px 8px",
-              padding: "6px 10px",
-              borderRadius: "999px",
-              background: "#16a34a",
-              color: "white",
-              fontSize: "12px",
-              fontWeight: 700,
-            }}
-          >
-            ✓ Selected
-          </p>
-        )}
+                        {selectedCustomerSystem === "midea" && (
+                          <p
+                            style={{
+                              display: "inline-block",
+                              margin: "0 0 10px 8px",
+                              padding: "6px 10px",
+                              borderRadius: "999px",
+                              background: "#16a34a",
+                              color: "white",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ✓ Selected
+                          </p>
+                        )}
 
-        <p
-          style={{
-            display: "inline-block",
-            margin: "0 0 10px 0",
-            padding: "6px 10px",
-            borderRadius: "999px",
-            background: "#dbeafe",
-            color: "#1d4ed8",
-            fontSize: "12px",
-            fontWeight: 700,
-          }}
-        >
-          Budget
-        </p>
+                        <p
+                          style={{
+                            display: "inline-block",
+                            margin: "0 0 10px 0",
+                            padding: "6px 10px",
+                            borderRadius: "999px",
+                            background: "#dbeafe",
+                            color: "#1d4ed8",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Budget
+                        </p>
 
-        <h3 style={{ margin: "0 0 8px 0" }}>Midea Solstice</h3>
+                        <h3 style={{ margin: "0 0 8px 0" }}>Midea Solstice</h3>
 
-        <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
-          Best value option for effective heating and cooling.
-        </p>
+                        <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
+                          Best value option for effective heating and cooling.
+                        </p>
 
-        <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
-          From £{customerEstimate.mideaTotal.toLocaleString()}
-        </p>
+                        <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
+                          From £{customerEstimate.mideaTotal.toLocaleString()}
+                        </p>
 
-        <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-          Good budget-friendly choice.
-        </p>
-      </div>
+                        <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                          Good budget-friendly choice.
+                        </p>
+                      </div>
 
-      <div
-        onClick={() => {
-          setSelectedCustomerSystem("mitsubishi");
-          document
-            .getElementById("customer-form-start")
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-        }}
-        style={{
-          background: "#e9edf3",
-          borderRadius: "16px",
-          padding: "18px",
-          border:
-            selectedCustomerSystem === "mitsubishi"
-              ? "2px solid #0b2e73"
-              : "2px solid #d6dde8",
-          boxShadow:
-            selectedCustomerSystem === "mitsubishi"
-              ? "0 8px 24px rgba(11,46,115,0.12)"
-              : "none",
-          cursor: "pointer",
-        }}
-      >
-        <div
-          style={{
-            height: "160px",
-            borderRadius: "12px",
-            background: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "14px",
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/mitsubishi-ay.png"
-            alt="Mitsubishi Electric AY"
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              objectFit: "contain",
-            }}
-          />
-        </div>
+                      <div
+                        onClick={() => {
+                          setSelectedCustomerSystem("mitsubishi");
+                          document
+                            .getElementById("customer-form-start")
+                            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }}
+                        style={{
+                          background: "#e9edf3",
+                          borderRadius: "16px",
+                          padding: "18px",
+                          border:
+                            selectedCustomerSystem === "mitsubishi"
+                              ? "2px solid #0b2e73"
+                              : "2px solid #d6dde8",
+                          boxShadow:
+                            selectedCustomerSystem === "mitsubishi"
+                              ? "0 8px 24px rgba(11,46,115,0.12)"
+                              : "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "160px",
+                            borderRadius: "12px",
+                            background: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: "14px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            src="/mitsubishi-ay.png"
+                            alt="Mitsubishi Electric AY"
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "100%",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </div>
 
-        {selectedCustomerSystem === "mitsubishi" && (
-          <p
-            style={{
-              display: "inline-block",
-              margin: "0 0 10px 8px",
-              padding: "6px 10px",
-              borderRadius: "999px",
-              background: "#16a34a",
-              color: "white",
-              fontSize: "12px",
-              fontWeight: 700,
-            }}
-          >
-            ✓ Selected
-          </p>
-        )}
+                        {selectedCustomerSystem === "mitsubishi" && (
+                          <p
+                            style={{
+                              display: "inline-block",
+                              margin: "0 0 10px 8px",
+                              padding: "6px 10px",
+                              borderRadius: "999px",
+                              background: "#16a34a",
+                              color: "white",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ✓ Selected
+                          </p>
+                        )}
 
-        <p
-          style={{
-            display: "inline-block",
-            margin: "0 0 10px 0",
-            padding: "6px 10px",
-            borderRadius: "999px",
-            background: "#dbeafe",
-            color: "#1d4ed8",
-            fontSize: "12px",
-            fontWeight: 700,
-          }}
-        >
-          Standard
-        </p>
+                        <p
+                          style={{
+                            display: "inline-block",
+                            margin: "0 0 10px 0",
+                            padding: "6px 10px",
+                            borderRadius: "999px",
+                            background: "#dbeafe",
+                            color: "#1d4ed8",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Standard
+                        </p>
 
-        <p
-          style={{
-            display: "inline-block",
-            margin: "0 0 10px 8px",
-            padding: "6px 10px",
-            borderRadius: "999px",
-            background: "#0b2e73",
-            color: "white",
-            fontSize: "12px",
-            fontWeight: 700,
-          }}
-        >
-          Most Popular
-        </p>
+                        <p
+                          style={{
+                            display: "inline-block",
+                            margin: "0 0 10px 8px",
+                            padding: "6px 10px",
+                            borderRadius: "999px",
+                            background: "#0b2e73",
+                            color: "white",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Most Popular
+                        </p>
 
-        <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Electric AY</h3>
+                        <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Electric AY</h3>
 
-        <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
-          Reliable all-round option with a more premium feel.
-        </p>
+                        <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
+                          Reliable all-round option with a more premium feel.
+                        </p>
 
-        <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
-          From £{customerEstimate.mitsubishiTotal.toLocaleString()}
-        </p>
+                        <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
+                          From £{customerEstimate.mitsubishiTotal.toLocaleString()}
+                        </p>
 
-        <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-          Popular balance of quality and value.
-        </p>
-      </div>
+                        <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                          Popular balance of quality and value.
+                        </p>
+                      </div>
 
-      <div
-        onClick={() => {
-          setSelectedCustomerSystem("zen");
-          document
-            .getElementById("customer-form-start")
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-        }}
-        style={{
-          background: "#e9edf3",
-          borderRadius: "16px",
-          padding: "18px",
-          border:
-            selectedCustomerSystem === "zen"
-              ? "2px solid #0b2e73"
-              : "2px solid #d6dde8",
-          boxShadow:
-            selectedCustomerSystem === "zen"
-              ? "0 8px 24px rgba(11,46,115,0.12)"
-              : "none",
-          cursor: "pointer",
-          opacity: customerEstimate.zenTotal > 0 ? 1 : 0.65,
-        }}
-      >
-        <div
-          style={{
-            height: "160px",
-            borderRadius: "12px",
-            background: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "14px",
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/zen.jpg"
-            alt="Mitsubishi Zen"
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              objectFit: "contain",
-            }}
-          />
-        </div>
+                      <div
+                        onClick={() => {
+                          setSelectedCustomerSystem("zen");
+                          document
+                            .getElementById("customer-form-start")
+                            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }}
+                        style={{
+                          background: "#e9edf3",
+                          borderRadius: "16px",
+                          padding: "18px",
+                          border:
+                            selectedCustomerSystem === "zen"
+                              ? "2px solid #0b2e73"
+                              : "2px solid #d6dde8",
+                          boxShadow:
+                            selectedCustomerSystem === "zen"
+                              ? "0 8px 24px rgba(11,46,115,0.12)"
+                              : "none",
+                          cursor: "pointer",
+                          opacity: customerEstimate.zenTotal > 0 ? 1 : 0.65,
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "160px",
+                            borderRadius: "12px",
+                            background: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: "14px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            src="/zen.jpg"
+                            alt="Mitsubishi Zen"
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "100%",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </div>
 
-        {selectedCustomerSystem === "zen" && (
-          <p
-            style={{
-              display: "inline-block",
-              margin: "0 0 10px 8px",
-              padding: "6px 10px",
-              borderRadius: "999px",
-              background: "#16a34a",
-              color: "white",
-              fontSize: "12px",
-              fontWeight: 700,
-            }}
-          >
-            ✓ Selected
-          </p>
-        )}
+                        {selectedCustomerSystem === "zen" && (
+                          <p
+                            style={{
+                              display: "inline-block",
+                              margin: "0 0 10px 8px",
+                              padding: "6px 10px",
+                              borderRadius: "999px",
+                              background: "#16a34a",
+                              color: "white",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ✓ Selected
+                          </p>
+                        )}
 
-        <p
-          style={{
-            display: "inline-block",
-            margin: "0 0 10px 0",
-            padding: "6px 10px",
-            borderRadius: "999px",
-            background: "#ede9fe",
-            color: "#6d28d9",
-            fontSize: "12px",
-            fontWeight: 700,
-          }}
-        >
-          Premium
-        </p>
+                        <p
+                          style={{
+                            display: "inline-block",
+                            margin: "0 0 10px 0",
+                            padding: "6px 10px",
+                            borderRadius: "999px",
+                            background: "#ede9fe",
+                            color: "#6d28d9",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Premium
+                        </p>
 
-        <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Zen</h3>
+                        <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Zen</h3>
 
-        <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
-          Designer premium option for customers wanting a higher-end finish.
-        </p>
+                        <p style={{ margin: "0 0 10px 0", color: "#475569" }}>
+                          Designer premium option for customers wanting a higher-end finish.
+                        </p>
 
-        <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
-          {customerEstimate.zenTotal > 0
-            ? `From £${customerEstimate.zenTotal.toLocaleString()}`
-            : "Not available for all selected room sizes"}
-        </p>
+                        <p style={{ margin: "0 0 6px 0", fontWeight: 700 }}>
+                          {customerEstimate.zenTotal > 0
+                            ? `From £${customerEstimate.zenTotal.toLocaleString()}`
+                            : "Not available for all selected room sizes"}
+                        </p>
 
-        <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-          Premium look and feel.
-        </p>
-      </div>
-    </div>
+                        <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                          Premium look and feel.
+                        </p>
+                      </div>
+                    </div>
 
-    <a
-      href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
+                    <a
+                      href={`https://wa.me/447833679777?text=${encodeURIComponent(`Hi ProAir, I used your estimator.
 
 Selected system: ${systemNames[selectedCustomerSystem]}
 Number of rooms: ${customerRooms.length}
@@ -1364,65 +1377,69 @@ ${roomBreakdown}
 Estimated cooling load: ${customerEstimate.totalLoad} kW
 Suggested total capacity: ${customerEstimate.totalRecommended} kW
 Guide price: ${
-        selectedCustomerSystem === "midea"
-          ? `£${customerEstimate.mideaTotal.toLocaleString()}`
-          : selectedCustomerSystem === "zen"
-          ? `£${customerEstimate.zenTotal.toLocaleString()}`
-          : `£${customerEstimate.mitsubishiTotal.toLocaleString()}`
-      }
+  selectedCustomerSystem === "midea"
+    ? `£${customerEstimate.mideaTotal.toLocaleString()}`
+    : selectedCustomerSystem === "zen"
+    ? `£${customerEstimate.zenTotal.toLocaleString()}`
+    : `£${customerEstimate.mitsubishiTotal.toLocaleString()}`
+}
 
 Can I get a quote / site survey please?`)}`}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        display: "inline-block",
-        marginTop: "16px",
-        marginBottom: "20px",
-        background: "#25D366",
-        color: "white",
-        textDecoration: "none",
-        padding: "12px 18px",
-        borderRadius: "12px",
-        fontWeight: 700,
-      }}
-    >
-      Send this estimate on WhatsApp
-    </a>
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: "inline-block",
+                        marginTop: "16px",
+                        marginBottom: "20px",
+                        background: "#25D366",
+                        color: "white",
+                        textDecoration: "none",
+                        padding: "12px 18px",
+                        borderRadius: "12px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Send this estimate on WhatsApp
+                    </a>
 
-    <p>
-      <strong>Total estimated cooling load:</strong>{" "}
-      {customerEstimate.totalLoad} kW
-    </p>
+                    <p>
+                      <strong>Total estimated cooling load:</strong>{" "}
+                      {customerEstimate.totalLoad} kW
+                    </p>
 
-    <p>
-      <strong>Midea system guide price:</strong> £
-      {customerEstimate.mideaTotal.toLocaleString()}
-    </p>
+                    <p>
+                      <strong>Midea system guide price:</strong> £
+                      {customerEstimate.mideaTotal.toLocaleString()}
+                    </p>
 
-    <p>
-      <strong>Mitsubishi Electric guide price:</strong> £
-      {customerEstimate.mitsubishiTotal.toLocaleString()}
-    </p>
+                    <p>
+                      <strong>Mitsubishi Electric guide price:</strong> £
+                      {customerEstimate.mitsubishiTotal.toLocaleString()}
+                    </p>
 
-    {customerEstimate.zenTotal > 0 && (
-      <p>
-        <strong>Mitsubishi Zen premium guide price:</strong> £
-          {customerEstimate.zenTotal.toLocaleString()}
-      </p>
-     )}
+                    {customerEstimate.zenTotal > 0 && (
+                      <p>
+                        <strong>Mitsubishi Zen premium guide price:</strong> £
+                        {customerEstimate.zenTotal.toLocaleString()}
+                      </p>
+                    )}
 
-    <p style={{ fontSize: "13px", color: "#475569" }}>
-      Guide price only. Final cost depends on pipe runs, electrics, access and
-    </p>
+                    <p style={{ fontSize: "13px", color: "#475569" }}>
+                      Guide price only. Final cost depends on pipe runs, electrics,
+                      access and installation layout.
+                    </p>
 
-    <button type="submit" style={buttonStyle}>
-      Send estimate request
-    </button>
-   </>
-   )}
-</form>
-</div>
-);
+                    <button type="submit" style={buttonStyle}>
+                      Send estimate request
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
 }
 
 const inputStyle = {
