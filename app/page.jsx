@@ -1553,28 +1553,7 @@ Can I get a quote / site survey please?`)}`}
 </a>
    <p style={{fontSize:"12px", color:"#64748b", marginTop:"6px"}}>
 Most customers receive a reply within 10 minutes during working hours.
-</p>                 <p>
-                      <strong>Total estimated cooling load:</strong>{" "}
-                      {customerEstimate.totalLoad} kW
-                    </p>
 
-                    <p>
-                      <strong>Midea system guide price:</strong> £
-                      {customerEstimate.mideaTotal.toLocaleString()}
-                    </p>
-
-                    <p>
-                      <strong>Mitsubishi Electric guide price:</strong> £
-                      {customerEstimate.mitsubishiTotal.toLocaleString()}
-                    </p>
-
-                    {customerEstimate.zenTotal > 0 && (
-                      <p>
-  <strong>Mitsubishi Zen premium guide price:</strong>{" "}
-  {customerEstimate.zenEligible
-    ? `£${customerEstimate.zenTotal.toLocaleString()}`
-    : "Not available above 5.0kW per room"}
-</p>
                     )}
 
                     <p style={{ fontSize: "13px", color: "#475569" }}>
