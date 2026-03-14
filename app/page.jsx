@@ -1,8 +1,5 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
- 
-const [quoteCopied, setQuoteCopied] = useState(false);
-
 const unitSizes = [2.0, 2.5, 3.5, 4.2, 5.0, 6.0, 7.1, 8.5, 10.0];
 
 const wallModelMap = {
