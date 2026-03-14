@@ -1371,13 +1371,13 @@ const roomBreakdown = customerRooms
                             margin: "0 0 10px 8px",
                             padding: "6px 10px",
                             borderRadius: "999px",
-                            background: "#0b2e73",
+                            background: "#f59e0b",
                             color: "white",
                             fontSize: "12px",
                             fontWeight: 700,
                           }}
                         >
-                          Most Popular
+                         ⭐ Recommended
                         </p>
 
                         <h3 style={{ margin: "0 0 8px 0" }}>Mitsubishi Electric AY</h3>
