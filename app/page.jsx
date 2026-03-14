@@ -1530,7 +1530,7 @@ Can I get a quote / site survey please?`)}`}
                       }}>
           
 <a
-  href={`https://wa.me/447833679777?text=Hi%20ProAir%2C%20I%20used%20your%20AC%20estimator%20and%20would%20like%20a%20quote.`}
+  href={`https://wa.me/447833679777`}
   target="_blank"
   rel="noreferrer"
   style={{
