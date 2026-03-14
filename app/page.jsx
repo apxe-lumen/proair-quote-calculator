@@ -1418,6 +1418,8 @@ Can I get a quote / site survey please?`)}`}
     <button type="submit" style={buttonStyle}>
       Send estimate request
     </button>
+   </>
+   )}
 </form>
 </div>
 );
