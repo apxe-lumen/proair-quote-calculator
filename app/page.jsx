@@ -1554,8 +1554,6 @@ Can I get a quote / site survey please?`)}`}
    <p style={{fontSize:"12px", color:"#64748b", marginTop:"6px"}}>
 Most customers receive a reply within 10 minutes during working hours.
 
-                    )}
-
                     <p style={{ fontSize: "13px", color: "#475569" }}>
                       Guide price only. Final cost depends on pipe runs, electrics,
                       access and installation layout.
