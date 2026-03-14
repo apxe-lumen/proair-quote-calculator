@@ -1302,10 +1302,9 @@ const roomBreakdown = customerRooms
                           border: selectedCustomerSystem === "mitsubishi"
   ? "2px solid #22c55e"
   : "1px solid #e5e7eb",
-                          boxShadow:
-                            selectedCustomerSystem === "mitsubishi"
-                              ? "0 8px 24px rgba(11,46,115,0.12)"
-                              : "none",
+                          boxShadow: selectedCustomerSystem === "mitsubishi"
+  ? "0 12px 30px rgba(34,197,94,0.18)"
+  : "none",
                           cursor: "pointer",
                         }}
                       >
