@@ -1528,7 +1528,7 @@ Can I get a quote / site survey please?`)}`}
                         borderRadius: "12px",
                         fontWeight: 700,
                       }}
-                      <div
+                     <div
   style={{
     marginTop: "16px",
     marginBottom: "10px",
@@ -1548,9 +1548,25 @@ Can I get a quote / site survey please?`)}`}
     {customerRooms.length >= 4 && "4+ units: typically 2–3 days"}
   </div>
 </div>
-                    >
-                      Send this estimate on WhatsApp
-                    </a>
+
+<a
+  href={`https://wa.me/...`}
+  target="_blank"
+  rel="noreferrer"
+  style={{
+    display: "inline-block",
+    marginTop: "16px",
+    marginBottom: "20px",
+    background: "#25D366",
+    color: "white",
+    textDecoration: "none",
+    padding: "12px 18px",
+    borderRadius: "12px",
+    fontWeight: 700,
+  }}
+>
+  Send this estimate on WhatsApp
+</a>
 
                     <p>
                       <strong>Total estimated cooling load:</strong>{" "}
