@@ -1528,6 +1528,26 @@ Can I get a quote / site survey please?`)}`}
                         borderRadius: "12px",
                         fontWeight: 700,
                       }}
+                      <div
+  style={{
+    marginTop: "16px",
+    marginBottom: "10px",
+    padding: "12px",
+    background: "#f3f4f6",
+    borderRadius: "10px",
+    fontSize: "14px",
+    color: "#374151"
+  }}
+>
+  <strong>Typical installation time</strong>
+
+  <div style={{ marginTop: "6px" }}>
+    {customerRooms.length === 1 && "1 unit: typically 4–6 hours"}
+    {customerRooms.length === 2 && "2 units: typically completed in 1 day"}
+    {customerRooms.length === 3 && "3 units: typically 1–2 days"}
+    {customerRooms.length >= 4 && "4+ units: typically 2–3 days"}
+  </div>
+</div>
                     >
                       Send this estimate on WhatsApp
                     </a>
