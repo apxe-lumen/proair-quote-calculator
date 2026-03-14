@@ -703,10 +703,14 @@ const customerEstimate = useMemo(() => {
     0
   )
 
-  const zenTotal = roomResults.reduce((sum, r) => {
-    const price = getUnitPrice("zen", r.recommendedNumber)
-    return price ? sum + price : sum
-  }, 0)
+const zenEligible = roomResults.every((r) => r.recommendedNumber <= 5.0)
+
+const zenTotal = zenEligible
+  ? roomResults.reduce((sum, r) => {
+      const price = getUnitPrice("zen", r.recommendedNumber)
+      return price ? sum + price : sum
+    }, 0)
+  : null
 
   return {
     totalLoad: totalLoad.toFixed(2),
