@@ -918,7 +918,7 @@ timeframe: installTimeframe
                     required
                   />
                 </div>
-<div>
+<div style={{ marginTop: "12px" }}>
   <label>When are you looking to install?</label>
 
   <select
