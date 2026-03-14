@@ -1547,25 +1547,6 @@ Can I get a quote / site survey please?`)}`}
   Send this estimate on WhatsApp
 </a>
 
-<a
-  href={`https://wa.me/...`}
-  target="_blank"
-  rel="noreferrer"
-  style={{
-    display: "inline-block",
-    marginTop: "16px",
-    marginBottom: "20px",
-    background: "#25D366",
-    color: "white",
-    textDecoration: "none",
-    padding: "12px 18px",
-    borderRadius: "12px",
-    fontWeight: 700,
-  }}
->
-  Send this estimate on WhatsApp
-</a>
-
                     <p>
                       <strong>Total estimated cooling load:</strong>{" "}
                       {customerEstimate.totalLoad} kW
