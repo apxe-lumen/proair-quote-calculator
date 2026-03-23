@@ -1003,9 +1003,8 @@ timeframe: installTimeframe
                         type="number"
                         value={room.length}
 onChange={(e) =>
-  updateCustomerRoom(room.id, "length", Number(e.target.value))
-}
-                        style={inputStyle}
+  updateCustomerRoom(room.id, "length", e.target.value)
+}                  style={inputStyle}
                       />
                     </div>
                     <div>
