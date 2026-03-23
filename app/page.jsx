@@ -571,7 +571,7 @@ const customerDetailsComplete =
 
     result.roomResults.forEach((room, index) => {
       lines.push(
-        `${index + 1}. ${room.name}: ${room.length}m x ${room.width}m x ${room.height}m | ${room.area}m² | Load ${room.kw}kW | Suggested ${room.recommended}kW | ${room.floorLabel} | Outdoor ${room.outdoorSideLabel} | Pipe run ${room.pipeRunLabel}`
+        `${index + 1}. ${room.name}: ${room.length}m x ${room.width}m x ${room.height}m | ${typeof room.area === "string" ? room.area : `${room.area}m²`} | Load ${room.kw}kW | Suggested ${room.recommended}kW | ${room.floorLabel} | Outdoor ${room.outdoorSideLabel} | Pipe run ${room.pipeRunLabel}`
       );
     });
 
