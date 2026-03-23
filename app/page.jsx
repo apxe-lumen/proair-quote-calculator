@@ -253,7 +253,7 @@ const height = Number(room.height);
 if (!room.length || !room.width) {
   return {
     ...room,
-    area: "",
+    area: "Enter room size to calculate",
     kw: "",
     recommended: "",
     recommendedNumber: 0,
