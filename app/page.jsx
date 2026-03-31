@@ -186,6 +186,7 @@ export default function Page() {
   const [customerRooms, setCustomerRooms] = useState([defaultCustomerRoom]);
   const [selectedCustomerSystem, setSelectedCustomerSystem] = useState("mitsubishi");
   const [isDesktop, setIsDesktop] = useState(false);
+  const [expandedRoomIds, setExpandedRoomIds] = useState([1]);
 
   const leadSentRef = useRef(false);
 
@@ -230,14 +231,18 @@ export default function Page() {
   };
 
   const addCustomerRoom = () => {
+    const newId = Date.now();
+
     setCustomerRooms((prev) => [
       ...prev,
       {
         ...defaultCustomerRoom,
-        id: Date.now(),
+        id: newId,
         name: `Room ${prev.length + 1}`,
       },
     ]);
+
+    setExpandedRoomIds((prev) => [...new Set([...prev, newId])]);
   };
 
   const removeCustomerRoom = (id) => {
@@ -245,6 +250,16 @@ export default function Page() {
       if (prev.length === 1) return prev;
       return prev.filter((room) => room.id !== id);
     });
+
+    setExpandedRoomIds((prev) => prev.filter((roomId) => roomId !== id));
+  };
+
+  const shouldUseCollapsibleRooms = customerRooms.length >= 3;
+
+  const toggleRoomExpanded = (id) => {
+    setExpandedRoomIds((prev) =>
+      prev.includes(id) ? prev.filter((roomId) => roomId !== id) : [...prev, id]
+    );
   };
 
   const customerEstimate = useMemo(() => {
@@ -533,7 +548,7 @@ Thank you.
               <div style={sectionTitleStyle}>Rooms</div>
 
               <div style={roomHeaderRowStyle}>
-                <p style={cardSubtitleStyle}>Add each room you want us to estimate.</p>
+                <p style={cardSubtitleStyle}>Add each room you want to estimate.</p>
 
                 <button type="button" onClick={addCustomerRoom} style={smallButtonStyle}>
                   + Add room
@@ -542,10 +557,21 @@ Thank you.
 
               {customerRooms.map((room, index) => {
                 const roomResult = calculateRoom(room);
+                const isExpanded =
+                  !shouldUseCollapsibleRooms || expandedRoomIds.includes(room.id);
 
                 return (
                   <div key={room.id} style={roomCardStyle}>
-                    <div style={roomCardTopStyle}>
+                    <div
+                      style={{
+                        ...roomCardTopStyle,
+                        cursor: shouldUseCollapsibleRooms ? "pointer" : "default",
+                        marginBottom: isExpanded ? "12px" : 0,
+                      }}
+                      onClick={() => {
+                        if (shouldUseCollapsibleRooms) toggleRoomExpanded(room.id);
+                      }}
+                    >
                       <div>
                         <div style={roomNumberStyle}>Room {index + 1}</div>
 
@@ -555,176 +581,213 @@ Thank you.
                             onChange={(e) =>
                               updateCustomerRoom(room.id, "name", e.target.value)
                             }
+                            onClick={(e) => e.stopPropagation()}
                             style={roomNameInputStyle}
                           />
                           <RoomTypeBadge value={room.roomType} />
                         </div>
+
+                        {!isExpanded && (
+                          <div
+                            style={{
+                              marginTop: "10px",
+                              color: "#475569",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {room.length && room.width
+                              ? `${room.length}m × ${room.width}m • ${
+                                  roomResult.recommended || "TBC"
+                                } kW`
+                              : "Tap to expand room details"}
+                          </div>
+                        )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => removeCustomerRoom(room.id)}
-                        style={{
-                          ...removeButtonStyle,
-                          opacity: customerRooms.length === 1 ? 0.45 : 1,
-                          cursor: customerRooms.length === 1 ? "not-allowed" : "pointer",
-                        }}
-                        disabled={customerRooms.length === 1}
-                      >
-                        Remove
-                      </button>
-                    </div>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        {shouldUseCollapsibleRooms && (
+                          <div style={collapseIconStyle}>{isExpanded ? "−" : "+"}</div>
+                        )}
 
-                    <div style={responsiveGridStyle}>
-                      <div>
-                        <label style={labelStyle}>Length (m)</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={room.length}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "length", e.target.value)
-                          }
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Width (m)</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={room.width}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "width", e.target.value)
-                          }
-                          style={inputStyle}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={responsiveGridStyle}>
-                      <div>
-                        <label style={labelStyle}>Ceiling height (m)</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={room.height}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "height", Number(e.target.value))
-                          }
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Room type</label>
-                        <select
-                          value={room.roomType}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "roomType", e.target.value)
-                          }
-                          style={inputStyle}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeCustomerRoom(room.id);
+                          }}
+                          style={{
+                            ...removeButtonStyle,
+                            opacity: customerRooms.length === 1 ? 0.45 : 1,
+                            cursor:
+                              customerRooms.length === 1 ? "not-allowed" : "pointer",
+                          }}
+                          disabled={customerRooms.length === 1}
                         >
-                          <option value="bedroom">Bedroom</option>
-                          <option value="living">Living room</option>
-                          <option value="office">Office</option>
-                          <option value="garden_room">Garden room</option>
-                          <option value="kitchen">Kitchen</option>
-                        </select>
+                          Remove
+                        </button>
                       </div>
                     </div>
 
-                    <div style={responsiveGridStyle}>
-                      <div>
-                        <label style={labelStyle}>Glazing</label>
-                        <select
-                          value={room.glazing}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "glazing", e.target.value)
-                          }
-                          style={inputStyle}
-                        >
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                          <option value="very_high">Very high / bifolds</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Sun exposure</label>
-                        <select
-                          value={room.exposure}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "exposure", e.target.value)
-                          }
-                          style={inputStyle}
-                        >
-                          <option value="north">North</option>
-                          <option value="east">East</option>
-                          <option value="west">West</option>
-                          <option value="south">South</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={responsiveGridStyle}>
-                      <div>
-                        <label style={labelStyle}>Floor level</label>
-                        <select
-                          value={room.floorLevel}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "floorLevel", e.target.value)
-                          }
-                          style={inputStyle}
-                        >
-                          <option value="ground">Ground floor</option>
-                          <option value="first">First floor</option>
-                          <option value="loft">Loft / second floor</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Best outdoor unit position</label>
-                        <select
-                          value={room.outdoorSide}
-                          onChange={(e) =>
-                            updateCustomerRoom(room.id, "outdoorSide", e.target.value)
-                          }
-                          style={inputStyle}
-                        >
-                          <option value="same_side">Same side as room</option>
-                          <option value="front">Front of property</option>
-                          <option value="rear">Rear of property</option>
-                          <option value="side">Side elevation</option>
-                          <option value="opposite_side">Opposite side of property</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={summaryCardStyle}>
-                      <div style={summaryHeaderStyle}>
-                        <strong>Room estimate</strong>
-                        <span style={summaryTagStyle}>Live</span>
-                      </div>
-
-                      <div style={roomEstimateGridStyle}>
-                        <div>
-                          <div style={miniLabelStyle}>Recommended room size</div>
-                          <div style={miniValueStyle}>
-                            {roomResult.recommended
-                              ? `${roomResult.recommended} kW`
-                              : "Enter room size"}
+                    {isExpanded && (
+                      <>
+                        <div style={responsiveGridStyle}>
+                          <div>
+                            <label style={labelStyle}>Length (m)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={room.length}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "length", e.target.value)
+                              }
+                              style={inputStyle}
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Width (m)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={room.width}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "width", e.target.value)
+                              }
+                              style={inputStyle}
+                            />
                           </div>
                         </div>
 
-                        <div>
-                          <div style={miniLabelStyle}>Estimated area</div>
-                          <div style={miniValueStyle}>
-                            {typeof roomResult.area === "string"
-                              ? roomResult.area
-                              : `${roomResult.area} m²`}
+                        <div style={responsiveGridStyle}>
+                          <div>
+                            <label style={labelStyle}>Ceiling height (m)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={room.height}
+                              onChange={(e) =>
+                                updateCustomerRoom(
+                                  room.id,
+                                  "height",
+                                  Number(e.target.value)
+                                )
+                              }
+                              style={inputStyle}
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Room type</label>
+                            <select
+                              value={room.roomType}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "roomType", e.target.value)
+                              }
+                              style={inputStyle}
+                            >
+                              <option value="bedroom">Bedroom</option>
+                              <option value="living">Living room</option>
+                              <option value="office">Office</option>
+                              <option value="garden_room">Garden room</option>
+                              <option value="kitchen">Kitchen</option>
+                            </select>
                           </div>
                         </div>
-                      </div>
-                    </div>
+
+                        <div style={responsiveGridStyle}>
+                          <div>
+                            <label style={labelStyle}>Glazing</label>
+                            <select
+                              value={room.glazing}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "glazing", e.target.value)
+                              }
+                              style={inputStyle}
+                            >
+                              <option value="low">Low</option>
+                              <option value="medium">Medium</option>
+                              <option value="high">High</option>
+                              <option value="very_high">Very high / bifolds</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Sun exposure</label>
+                            <select
+                              value={room.exposure}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "exposure", e.target.value)
+                              }
+                              style={inputStyle}
+                            >
+                              <option value="north">North</option>
+                              <option value="east">East</option>
+                              <option value="west">West</option>
+                              <option value="south">South</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div style={responsiveGridStyle}>
+                          <div>
+                            <label style={labelStyle}>Floor level</label>
+                            <select
+                              value={room.floorLevel}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "floorLevel", e.target.value)
+                              }
+                              style={inputStyle}
+                            >
+                              <option value="ground">Ground floor</option>
+                              <option value="first">First floor</option>
+                              <option value="loft">Loft / second floor</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Best outdoor unit position</label>
+                            <select
+                              value={room.outdoorSide}
+                              onChange={(e) =>
+                                updateCustomerRoom(room.id, "outdoorSide", e.target.value)
+                              }
+                              style={inputStyle}
+                            >
+                              <option value="same_side">Same side as room</option>
+                              <option value="front">Front of property</option>
+                              <option value="rear">Rear of property</option>
+                              <option value="side">Side elevation</option>
+                              <option value="opposite_side">
+                                Opposite side of property
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div style={summaryCardStyle}>
+                          <div style={summaryHeaderStyle}>
+                            <strong>Room estimate</strong>
+                            <span style={summaryTagStyle}>Live</span>
+                          </div>
+
+                          <div style={roomEstimateGridStyle}>
+                            <div>
+                              <div style={miniLabelStyle}>Recommended room size</div>
+                              <div style={miniValueStyle}>
+                                {roomResult.recommended
+                                  ? `${roomResult.recommended} kW`
+                                  : "Enter room size"}
+                              </div>
+                            </div>
+
+                            <div>
+                              <div style={miniLabelStyle}>Estimated area</div>
+                              <div style={miniValueStyle}>
+                                {typeof roomResult.area === "string"
+                                  ? roomResult.area
+                                  : `${roomResult.area} m²`}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 );
               })}
@@ -756,7 +819,9 @@ Thank you.
                       </div>
                       <div style={statCardStyle}>
                         <strong>Suggested capacity</strong>
-                        <p style={statValueStyle}>{customerEstimate.totalRecommended} kW</p>
+                        <p style={statValueStyle}>
+                          {customerEstimate.totalRecommended} kW
+                        </p>
                       </div>
                       <div style={statCardStyle}>
                         <strong>Rooms</strong>
@@ -764,11 +829,15 @@ Thank you.
                       </div>
                       <div style={statCardStyle}>
                         <strong>Cooling cost</strong>
-                        <p style={statValueStyle}>£{customerEstimate.estimatedCoolingMonthly}/mo</p>
+                        <p style={statValueStyle}>
+                          £{customerEstimate.estimatedCoolingMonthly}/mo
+                        </p>
                       </div>
                       <div style={statCardStyle}>
                         <strong>Heating cost</strong>
-                        <p style={statValueStyle}>£{customerEstimate.estimatedHeatingMonthly}/mo</p>
+                        <p style={statValueStyle}>
+                          £{customerEstimate.estimatedHeatingMonthly}/mo
+                        </p>
                       </div>
                     </div>
 
@@ -781,7 +850,9 @@ Thank you.
 
                   {customerDetailsComplete ? (
                     <div style={systemsWrapStyle}>
-                      <div style={sectionTitleStyle}>Recommended systems & guide price</div>
+                      <div style={sectionTitleStyle}>
+                        Recommended systems & guide price
+                      </div>
                       {renderSystemCards({
                         customerEstimate,
                         selectedCustomerSystem,
@@ -803,7 +874,8 @@ Thank you.
               <div style={benefitsCardStyle}>
                 <div style={benefitItemStyle}>
                   ✔ {customerRooms.length === 1 && "1 unit: typically 4–6 hours"}
-                  {customerRooms.length === 2 && "2 units: typically completed in 1 day"}
+                  {customerRooms.length === 2 &&
+                    "2 units: typically completed in 1 day"}
                   {customerRooms.length === 3 && "3 units: typically 1–2 days"}
                   {customerRooms.length >= 4 && "4+ units: typically 2–3 days"}
                 </div>
@@ -873,15 +945,21 @@ Thank you.
                       </div>
                       <div style={statCardStyle}>
                         <strong>Suggested capacity</strong>
-                        <p style={statValueStyle}>{customerEstimate.totalRecommended} kW</p>
+                        <p style={statValueStyle}>
+                          {customerEstimate.totalRecommended} kW
+                        </p>
                       </div>
                       <div style={statCardStyle}>
                         <strong>Cooling cost</strong>
-                        <p style={statValueStyle}>£{customerEstimate.estimatedCoolingMonthly}/mo</p>
+                        <p style={statValueStyle}>
+                          £{customerEstimate.estimatedCoolingMonthly}/mo
+                        </p>
                       </div>
                       <div style={statCardStyle}>
                         <strong>Heating cost</strong>
-                        <p style={statValueStyle}>£{customerEstimate.estimatedHeatingMonthly}/mo</p>
+                        <p style={statValueStyle}>
+                          £{customerEstimate.estimatedHeatingMonthly}/mo
+                        </p>
                       </div>
                     </div>
 
@@ -1253,6 +1331,20 @@ const removeButtonStyle = {
   padding: "10px 12px",
   fontSize: "13px",
   fontWeight: 800,
+};
+
+const collapseIconStyle = {
+  width: "34px",
+  height: "34px",
+  borderRadius: "999px",
+  background: "#dbeafe",
+  color: "#0b2e73",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "20px",
+  fontWeight: 800,
+  flexShrink: 0,
 };
 
 const summaryCardStyle = {
