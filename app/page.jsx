@@ -142,6 +142,7 @@ function SystemOptionCard({
   onClick,
   disabled = false,
   selectedBorder = "blue",
+  compact = false,
 }) {
   const selectedStyle =
     selectedBorder === "green"
@@ -153,12 +154,13 @@ function SystemOptionCard({
       onClick={disabled ? undefined : onClick}
       style={{
         ...systemCardStyle,
+        ...(compact ? systemCardCompactStyle : {}),
         ...(selected ? selectedStyle : {}),
         ...(disabled ? disabledSystemCardStyle : {}),
         cursor: disabled ? "not-allowed" : "pointer",
       }}
     >
-      <div style={systemImageWrapStyle}>
+      <div style={{ ...systemImageWrapStyle, ...(compact ? systemImageWrapCompactStyle : {}) }}>
         <img src={imageSrc} alt={imageAlt} style={systemImageStyle} />
       </div>
 
@@ -168,27 +170,42 @@ function SystemOptionCard({
         {selected ? <span style={selectedPillStyle}>✓ Selected</span> : null}
       </div>
 
-      <h3 style={systemTitleStyle}>{title}</h3>
-      <p style={systemDescriptionStyle}>{description}</p>
-      <p style={systemPriceStyle}>{priceText}</p>
+      <h3 style={{ ...systemTitleStyle, ...(compact ? systemTitleCompactStyle : {}) }}>
+        {title}
+      </h3>
+      <p
+        style={{
+          ...systemDescriptionStyle,
+          ...(compact ? systemDescriptionCompactStyle : {}),
+        }}
+      >
+        {description}
+      </p>
+      <p style={{ ...systemPriceStyle, ...(compact ? systemPriceCompactStyle : {}) }}>
+        {priceText}
+      </p>
       <p style={systemNoteStyle}>{note}</p>
     </div>
   );
 }
 
-function SystemCardsCarousel({
+function SystemCardsDeck({
   customerEstimate,
   selectedCustomerSystem,
   setSelectedCustomerSystem,
 }) {
   const scrollRef = useRef(null);
-  const [isWide, setIsWide] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
+  const [screenMode, setScreenMode] = useState("mobile");
 
   useEffect(() => {
     const update = () => {
-      setIsWide(window.innerWidth >= 1200);
-      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1200);
+      if (window.innerWidth >= 1280) {
+        setScreenMode("desktop");
+      } else if (window.innerWidth >= 768) {
+        setScreenMode("tablet");
+      } else {
+        setScreenMode("mobile");
+      }
     };
 
     update();
@@ -198,14 +215,24 @@ function SystemCardsCarousel({
 
   const scrollByAmount = (direction) => {
     if (!scrollRef.current) return;
-    const amount = scrollRef.current.clientWidth * 0.82;
+
+    const amount =
+      screenMode === "desktop"
+        ? scrollRef.current.clientWidth * 0.42
+        : screenMode === "tablet"
+        ? scrollRef.current.clientWidth * 0.7
+        : scrollRef.current.clientWidth * 0.88;
+
     scrollRef.current.scrollBy({
       left: direction === "left" ? -amount : amount,
       behavior: "smooth",
     });
   };
 
-  const cardWidth = isWide ? "calc((100% - 28px) / 3)" : isTablet ? "calc((100% - 14px) / 2)" : "85%";
+  const isDesktopDeck = screenMode === "desktop";
+  const cardWidth =
+    screenMode === "desktop" ? 350 : screenMode === "tablet" ? 320 : 290;
+  const overlap = screenMode === "desktop" ? -78 : 0;
 
   return (
     <div style={systemCarouselWrapStyle}>
@@ -232,9 +259,28 @@ function SystemCardsCarousel({
         </div>
       </div>
 
-      <div ref={scrollRef} style={systemCardsScrollerStyle}>
-        <div style={systemCardsRowStyle}>
-          <div style={{ ...systemCardItemStyle, minWidth: cardWidth }}>
+      <div ref={scrollRef} className="system-cards-scroller" style={systemCardsScrollerStyle}>
+        <div
+          style={{
+            ...systemCardsRowStyle,
+            gap: isDesktopDeck ? "0px" : "14px",
+            paddingLeft: isDesktopDeck ? "28px" : "2px",
+            paddingRight: isDesktopDeck ? "90px" : "2px",
+          }}
+        >
+          <div
+            style={{
+              ...systemDeckItemStyle,
+              width: `${cardWidth}px`,
+              marginLeft: "0px",
+              zIndex: selectedCustomerSystem === "midea" ? 4 : 1,
+              transform: isDesktopDeck
+                ? selectedCustomerSystem === "midea"
+                  ? "translateY(-6px) rotate(-4deg)"
+                  : "rotate(-4deg)"
+                : "none",
+            }}
+          >
             <SystemOptionCard
               imageSrc="/midea-solstice.png"
               imageAlt="Midea Solstice"
@@ -249,7 +295,19 @@ function SystemCardsCarousel({
             />
           </div>
 
-          <div style={{ ...systemCardItemStyle, minWidth: cardWidth }}>
+          <div
+            style={{
+              ...systemDeckItemStyle,
+              width: `${cardWidth}px`,
+              marginLeft: `${overlap}px`,
+              zIndex: selectedCustomerSystem === "mitsubishi" ? 5 : 3,
+              transform: isDesktopDeck
+                ? selectedCustomerSystem === "mitsubishi"
+                  ? "translateY(-12px) scale(1.03)"
+                  : "translateY(-2px)"
+                : "none",
+            }}
+          >
             <SystemOptionCard
               imageSrc="/mitsubishi-ay.png"
               imageAlt="Mitsubishi Electric AY"
@@ -267,7 +325,19 @@ function SystemCardsCarousel({
             />
           </div>
 
-          <div style={{ ...systemCardItemStyle, minWidth: cardWidth }}>
+          <div
+            style={{
+              ...systemDeckItemStyle,
+              width: `${cardWidth}px`,
+              marginLeft: `${overlap}px`,
+              zIndex: selectedCustomerSystem === "zen" ? 4 : 2,
+              transform: isDesktopDeck
+                ? selectedCustomerSystem === "zen"
+                  ? "translateY(-6px) rotate(4deg)"
+                  : "rotate(4deg)"
+                : "none",
+            }}
+          >
             <SystemOptionCard
               imageSrc="/zen.jpg"
               imageAlt="Mitsubishi Zen"
@@ -292,6 +362,70 @@ function SystemCardsCarousel({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SidebarSystemCards({
+  customerEstimate,
+  selectedCustomerSystem,
+  setSelectedCustomerSystem,
+}) {
+  return (
+    <div style={sidebarSystemsStackStyle}>
+      <SystemOptionCard
+        imageSrc="/midea-solstice.png"
+        imageAlt="Midea Solstice"
+        pill="Budget"
+        pillStyle={budgetPillStyle}
+        selected={selectedCustomerSystem === "midea"}
+        title="Midea Solstice"
+        description="Best value option for effective heating and cooling."
+        priceText={`From £${customerEstimate.mideaTotal.toLocaleString()}`}
+        note="Good budget-friendly choice."
+        onClick={() => setSelectedCustomerSystem("midea")}
+        compact
+      />
+
+      <SystemOptionCard
+        imageSrc="/mitsubishi-ay.png"
+        imageAlt="Mitsubishi Electric AY"
+        pill="Standard"
+        pillStyle={standardPillStyle}
+        extraPill="⭐ Recommended"
+        extraPillStyle={recommendedPillStyle}
+        selected={selectedCustomerSystem === "mitsubishi"}
+        selectedBorder="green"
+        title="Mitsubishi Electric AY"
+        description="Reliable all-round option with a more premium feel."
+        priceText={`From £${customerEstimate.mitsubishiTotal.toLocaleString()}`}
+        note="Popular balance of quality and value."
+        onClick={() => setSelectedCustomerSystem("mitsubishi")}
+        compact
+      />
+
+      <SystemOptionCard
+        imageSrc="/zen.jpg"
+        imageAlt="Mitsubishi Zen"
+        pill="Premium"
+        pillStyle={premiumPillStyle}
+        selected={selectedCustomerSystem === "zen"}
+        title="Mitsubishi Zen"
+        description="Designer premium option for customers wanting a higher-end finish."
+        priceText={
+          customerEstimate.zenEligible
+            ? `From £${customerEstimate.zenTotal.toLocaleString()}`
+            : "Only available up to 5.0kW per room"
+        }
+        note={
+          customerEstimate.zenEligible
+            ? "Premium look and feel."
+            : "Zen range is not available above 5.0kW room sizes."
+        }
+        onClick={() => setSelectedCustomerSystem("zen")}
+        disabled={!customerEstimate.zenEligible}
+        compact
+      />
     </div>
   );
 }
@@ -549,6 +683,12 @@ Thank you.
 
   return (
     <div style={pageStyle}>
+      <style>{`
+        .system-cards-scroller::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+
       <div style={backgroundGlowOne} />
       <div style={backgroundGlowTwo} />
 
@@ -973,7 +1113,7 @@ Thank you.
                       <div style={sectionTitleStyle}>
                         Recommended systems & guide price
                       </div>
-                      <SystemCardsCarousel
+                      <SystemCardsDeck
                         customerEstimate={customerEstimate}
                         selectedCustomerSystem={selectedCustomerSystem}
                         setSelectedCustomerSystem={setSelectedCustomerSystem}
@@ -1097,7 +1237,7 @@ Thank you.
                           Recommended systems & guide price
                         </div>
 
-                        <SystemCardsCarousel
+                        <SidebarSystemCards
                           customerEstimate={customerEstimate}
                           selectedCustomerSystem={selectedCustomerSystem}
                           setSelectedCustomerSystem={setSelectedCustomerSystem}
@@ -1501,8 +1641,8 @@ const systemCarouselButtonsStyle = {
 };
 
 const systemScrollButtonStyle = {
-  width: "36px",
-  height: "36px",
+  width: "40px",
+  height: "40px",
   borderRadius: "999px",
   border: "1px solid #dbe6ff",
   background: "#ffffff",
@@ -1515,22 +1655,30 @@ const systemScrollButtonStyle = {
 
 const systemCardsScrollerStyle = {
   overflowX: "auto",
-  overflowY: "hidden",
+  overflowY: "visible",
   WebkitOverflowScrolling: "touch",
-  scrollSnapType: "x mandatory",
-  paddingBottom: "6px",
-  marginRight: "-4px",
+  scrollSnapType: "x proximity",
+  paddingTop: "16px",
+  paddingBottom: "10px",
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
 };
 
 const systemCardsRowStyle = {
   display: "flex",
-  gap: "14px",
+  alignItems: "stretch",
   minWidth: "max-content",
 };
 
-const systemCardItemStyle = {
+const systemDeckItemStyle = {
   flex: "0 0 auto",
-  scrollSnapAlign: "start",
+  transition: "transform 0.22s ease, z-index 0.22s ease",
+  scrollSnapAlign: "center",
+};
+
+const sidebarSystemsStackStyle = {
+  display: "grid",
+  gap: "12px",
 };
 
 const systemCardStyle = {
@@ -1538,8 +1686,12 @@ const systemCardStyle = {
   borderRadius: "18px",
   padding: "16px",
   border: "1px solid #e5e7eb",
-  boxShadow: "0 8px 20px rgba(15,23,42,0.04)",
+  boxShadow: "0 12px 30px rgba(15,23,42,0.08)",
   minHeight: "100%",
+};
+
+const systemCardCompactStyle = {
+  padding: "14px",
 };
 
 const selectedSystemCardStyle = {
@@ -1565,6 +1717,11 @@ const systemImageWrapStyle = {
   justifyContent: "center",
   marginBottom: "14px",
   overflow: "hidden",
+};
+
+const systemImageWrapCompactStyle = {
+  height: "110px",
+  marginBottom: "12px",
 };
 
 const systemImageStyle = {
@@ -1636,10 +1793,18 @@ const systemTitleStyle = {
   color: "#0f172a",
 };
 
+const systemTitleCompactStyle = {
+  fontSize: "18px",
+};
+
 const systemDescriptionStyle = {
   margin: "0 0 10px 0",
   color: "#475569",
   lineHeight: 1.5,
+};
+
+const systemDescriptionCompactStyle = {
+  fontSize: "14px",
 };
 
 const systemPriceStyle = {
@@ -1647,6 +1812,10 @@ const systemPriceStyle = {
   fontWeight: 900,
   color: "#0b2e73",
   fontSize: "18px",
+};
+
+const systemPriceCompactStyle = {
+  fontSize: "17px",
 };
 
 const systemNoteStyle = {
