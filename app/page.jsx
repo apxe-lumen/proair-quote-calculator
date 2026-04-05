@@ -45,20 +45,6 @@ function getUnitPrice(brand, size) {
   return 3000;
 }
 
-function getFloorLabel(floorLevel) {
-  if (floorLevel === "first") return "First floor";
-  if (floorLevel === "loft") return "Loft / second floor";
-  return "Ground floor";
-}
-
-function getOutdoorSideLabel(outdoorSide) {
-  if (outdoorSide === "front") return "Front of property";
-  if (outdoorSide === "rear") return "Rear of property";
-  if (outdoorSide === "side") return "Side elevation";
-  if (outdoorSide === "opposite_side") return "Opposite side of property";
-  return "Same side as room";
-}
-
 function calculateRoom(room) {
   if (!room.length || !room.width) {
     return {
@@ -464,14 +450,27 @@ export default function Page() {
     useState("mitsubishi");
   const [isDesktop, setIsDesktop] = useState(false);
   const [expandedRoomIds, setExpandedRoomIds] = useState([1]);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const leadSentRef = useRef(false);
+  // "none" → nothing sent. "partial" → abandonment lead fired.
+  // "completed" → full quote submitted (terminal — no further sends).
+  const leadStageRef = useRef("none");
+  const partialTimerRef = useRef(null);
+
+  const hasAnySizedRoom = customerRooms.some(
+    (room) => Number(room.length) > 0 && Number(room.width) > 0
+  );
 
   const customerDetailsComplete =
     customerName.trim() &&
     customerPhone.trim() &&
     customerEmail.trim() &&
     customerPostcode.trim();
+
+  // Basic shape check so we don't fire partial leads on half-typed emails.
+  const contactDetailsValid =
+    customerDetailsComplete && /^\S+@\S+\.\S+$/.test(customerEmail.trim());
 
   useEffect(() => {
     const updateLayout = () => {
@@ -569,9 +568,10 @@ export default function Page() {
       0
     );
 
-    const zenEligible = roomResults.every(
-      (r) => !r.recommendedNumber || r.recommendedNumber <= 5.0
-    );
+    const sizedRoomResults = roomResults.filter((r) => r.recommendedNumber > 0);
+    const zenEligible =
+      sizedRoomResults.length > 0 &&
+      sizedRoomResults.every((r) => r.recommendedNumber <= 5.0);
 
     const zenTotal = zenEligible
       ? roomResults.reduce((sum, r) => {
@@ -595,20 +595,6 @@ export default function Page() {
       estimatedCoolingMonthly,
       estimatedHeatingMonthly,
     };
-  }, [customerRooms]);
-
-  const customerRoomSummary = useMemo(() => {
-    const lines = customerRooms.map((room, index) => {
-      return `${index + 1}. ${room.name}: ${room.length || "-"}m x ${
-        room.width || "-"
-      }m x ${room.height}m | Room type: ${room.roomType} | Glazing: ${
-        room.glazing
-      } | Sun exposure: ${room.exposure} | Floor: ${getFloorLabel(
-        room.floorLevel
-      )} | Outdoor position: ${getOutdoorSideLabel(room.outdoorSide)}`;
-    });
-
-    return lines.join("\n");
   }, [customerRooms]);
 
   const systemNames = {
@@ -635,60 +621,143 @@ export default function Page() {
     })
     .join("\n");
 
+  // Build a lead payload for /api/lead. `stage` is "partial" or "completed".
+  const buildLeadPayload = (stage) => ({
+    stage,
+    name: customerName,
+    phone: customerPhone,
+    email: customerEmail,
+    postcode: customerPostcode,
+    system: systemNames[selectedCustomerSystem],
+    rooms: customerRooms.length,
+    load: customerEstimate.totalLoad,
+    capacity: customerEstimate.totalRecommended,
+    roomBreakdown,
+    mideaPrice: customerEstimate.mideaTotal,
+    mitsubishiPrice: customerEstimate.mitsubishiTotal,
+    zenPrice: customerEstimate.zenTotal,
+    zenEligible: customerEstimate.zenEligible,
+    notes: customerNotes,
+    timeframe: installTimeframe,
+  });
+
+  // Partial-lead capture: if the user finishes typing valid contact details
+  // but doesn't click submit, fire a "partial" lead so sales can follow up.
+  // Gated on hasAnySizedRoom so we only capture people who actually engaged
+  // with the calculator. Debounced so we don't send on every keystroke.
   useEffect(() => {
-    if (!customerDetailsComplete || leadSentRef.current) return;
+    if (leadStageRef.current !== "none") return;
+    if (!hasAnySizedRoom || !contactDetailsValid) {
+      if (partialTimerRef.current) {
+        clearTimeout(partialTimerRef.current);
+        partialTimerRef.current = null;
+      }
+      return;
+    }
 
-    const sendLead = async () => {
-      try {
-        await fetch("/api/lead", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: customerName,
-            phone: customerPhone,
-            email: customerEmail,
-            postcode: customerPostcode,
-            system: systemNames[selectedCustomerSystem],
-            rooms: customerRooms.length,
-            load: customerEstimate.totalLoad,
-            capacity: customerEstimate.totalRecommended,
-            roomBreakdown,
-            mideaPrice: customerEstimate.mideaTotal,
-            mitsubishiPrice: customerEstimate.mitsubishiTotal,
-            zenPrice: customerEstimate.zenTotal,
-            zenEligible: customerEstimate.zenEligible,
-            notes: customerNotes,
-            timeframe: installTimeframe,
-          }),
-        });
+    if (partialTimerRef.current) clearTimeout(partialTimerRef.current);
+    partialTimerRef.current = setTimeout(() => {
+      if (leadStageRef.current !== "none") return;
+      leadStageRef.current = "partial";
+      fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildLeadPayload("partial")),
+        keepalive: true,
+      }).catch((error) => {
+        console.error("Partial lead send failed", error);
+        // Roll back so a later submit can still fire as "completed".
+        if (leadStageRef.current === "partial") leadStageRef.current = "none";
+      });
+    }, 4000);
 
-        leadSentRef.current = true;
-      } catch (error) {
-        console.error("Lead send failed", error);
+    return () => {
+      if (partialTimerRef.current) {
+        clearTimeout(partialTimerRef.current);
+        partialTimerRef.current = null;
       }
     };
-
-    sendLead();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    customerDetailsComplete,
+    hasAnySizedRoom,
+    contactDetailsValid,
     customerName,
     customerPhone,
     customerEmail,
     customerPostcode,
-    selectedCustomerSystem,
-    customerRooms.length,
+  ]);
+
+  // Tab-close / navigation fallback: if the user bails with valid contact
+  // details but the debounced timer hasn't fired yet, send via sendBeacon
+  // which survives page unload where fetch would be killed.
+  useEffect(() => {
+    const flushOnHide = () => {
+      if (leadStageRef.current !== "none") return;
+      if (!hasAnySizedRoom || !contactDetailsValid) return;
+      if (typeof navigator === "undefined" || !navigator.sendBeacon) return;
+
+      leadStageRef.current = "partial";
+      const blob = new Blob(
+        [JSON.stringify(buildLeadPayload("partial"))],
+        { type: "application/json" }
+      );
+      navigator.sendBeacon("/api/lead", blob);
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushOnHide();
+    };
+
+    window.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flushOnHide);
+    return () => {
+      window.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flushOnHide);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    hasAnySizedRoom,
+    contactDetailsValid,
+    customerName,
+    customerPhone,
+    customerEmail,
+    customerPostcode,
     customerEstimate.totalLoad,
     customerEstimate.totalRecommended,
-    customerEstimate.mideaTotal,
-    customerEstimate.mitsubishiTotal,
-    customerEstimate.zenTotal,
-    customerEstimate.zenEligible,
-    customerNotes,
-    installTimeframe,
-    roomBreakdown,
   ]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (isSubmitting || leadStageRef.current === "completed") return;
+    if (!hasAnySizedRoom || !contactDetailsValid) return;
+
+    // Cancel any pending partial-lead send — submit supersedes it.
+    if (partialTimerRef.current) {
+      clearTimeout(partialTimerRef.current);
+      partialTimerRef.current = null;
+    }
+
+    setIsSubmitting(true);
+    const previousStage = leadStageRef.current;
+    leadStageRef.current = "completed";
+
+    try {
+      await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildLeadPayload("completed")),
+      });
+      setHasSubmitted(true);
+    } catch (error) {
+      console.error("Lead submit failed", error);
+      leadStageRef.current = previousStage;
+      alert(
+        "Sorry, we couldn't send your estimate just now. Please try again or message us on WhatsApp."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const whatsappHref = `https://wa.me/447833679777?text=${encodeURIComponent(
     `Hi ProAir
@@ -766,94 +835,7 @@ Thank you.
               </p>
             </div>
 
-            <form
-              action="https://formsubmit.co/contact@proairuk.co.uk"
-              method="POST"
-            >
-              <input
-                type="hidden"
-                name="_subject"
-                value="New ProAir estimate request"
-              />
-              <input type="hidden" name="_captcha" value="false" />
-              <input type="hidden" name="_template" value="table" />
-              <input
-                type="hidden"
-                name="Room summary"
-                value={customerRoomSummary}
-              />
-              <input
-                type="hidden"
-                name="Selected system"
-                value={systemNames[selectedCustomerSystem]}
-              />
-
-              <div style={sectionTitleStyle}>Your details</div>
-
-              <div style={responsiveGridStyle}>
-                <div>
-                  <label style={labelStyle}>Full name</label>
-                  <input
-                    type="text"
-                    name="Full name"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Phone number</label>
-                  <input
-                    type="text"
-                    name="Phone number"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div style={responsiveGridStyle}>
-                <div>
-                  <label style={labelStyle}>Email address</label>
-                  <input
-                    type="email"
-                    name="Email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle}>Postcode</label>
-                  <input
-                    type="text"
-                    name="Postcode"
-                    value={customerPostcode}
-                    onChange={(e) => setCustomerPostcode(e.target.value)}
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={labelStyle}>When are you looking to install?</label>
-                <select
-                  value={installTimeframe}
-                  onChange={(e) => setInstallTimeframe(e.target.value)}
-                  style={inputStyle}
-                >
-                  <option value="">Select timeframe</option>
-                  <option value="ASAP">As soon as possible</option>
-                  <option value="1 Month">Within the next month</option>
-                  <option value="Researching">Just researching</option>
-                </select>
-              </div>
-
+            <form onSubmit={handleSubmit} noValidate>
               <div style={sectionTitleStyle}>Rooms</div>
 
               <div style={roomHeaderRowStyle}>
@@ -1166,12 +1148,160 @@ Thank you.
                 />
               </div>
 
-              {!isDesktop && (
+              {/* Mobile-only live sizing readout during the rooms step.
+                  Pricing and running costs stay hidden until submit. */}
+              {!isDesktop && hasAnySizedRoom && !hasSubmitted && (
+                <div style={summaryCardStyle}>
+                  <div style={summaryHeaderStyle}>
+                    <strong>Your rooms so far</strong>
+                    <span style={summaryTagStyle}>Live</span>
+                  </div>
+
+                  <div style={statsGridStyle}>
+                    <div style={statCardStyle}>
+                      <strong>Total cooling load</strong>
+                      <p style={statValueStyle}>
+                        {customerEstimate.totalLoad} kW
+                      </p>
+                    </div>
+                    <div style={statCardStyle}>
+                      <strong>Suggested capacity</strong>
+                      <p style={statValueStyle}>
+                        {customerEstimate.totalRecommended} kW
+                      </p>
+                    </div>
+                    <div style={statCardStyle}>
+                      <strong>Rooms</strong>
+                      <p style={statValueStyle}>{customerRooms.length}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2 — Contact details. Only appears once the user has
+                  actually sized a room, and only until they submit. */}
+              {hasAnySizedRoom && !hasSubmitted && (
+                <>
+                  <div style={sectionTitleStyle}>Your details</div>
+                  <p style={cardSubtitleStyle}>
+                    Add your contact details and we&apos;ll send your guide
+                    prices and recommended systems.
+                  </p>
+
+                  <div style={{ ...responsiveGridStyle, marginTop: "16px" }}>
+                    <div>
+                      <label style={labelStyle}>Full name</label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        style={inputStyle}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Phone number</label>
+                      <input
+                        type="tel"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        style={inputStyle}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div style={responsiveGridStyle}>
+                    <div>
+                      <label style={labelStyle}>Email address</label>
+                      <input
+                        type="email"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        style={inputStyle}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Postcode</label>
+                      <input
+                        type="text"
+                        value={customerPostcode}
+                        onChange={(e) => setCustomerPostcode(e.target.value)}
+                        style={inputStyle}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>
+                      When are you looking to install?
+                    </label>
+                    <select
+                      value={installTimeframe}
+                      onChange={(e) => setInstallTimeframe(e.target.value)}
+                      style={inputStyle}
+                    >
+                      <option value="">Select timeframe</option>
+                      <option value="ASAP">As soon as possible</option>
+                      <option value="1 Month">Within the next month</option>
+                      <option value="Researching">Just researching</option>
+                    </select>
+                  </div>
+
+                  <div style={benefitsCardStyle}>
+                    <div style={benefitItemStyle}>
+                      ✔{" "}
+                      {customerRooms.length === 1 &&
+                        "1 unit: typically 4–6 hours"}
+                      {customerRooms.length === 2 &&
+                        "2 units: typically completed in 1 day"}
+                      {customerRooms.length === 3 &&
+                        "3 units: typically 1–2 days"}
+                      {customerRooms.length >= 4 &&
+                        "4+ units: typically 2–3 days"}
+                    </div>
+                    <div style={benefitItemStyle}>
+                      ✔ Free site survey included
+                    </div>
+                    <div style={benefitItemStyle}>
+                      ✔ F-Gas certified installation
+                    </div>
+                    <div style={benefitItemStyle}>
+                      ✔ Up to 7-year manufacturer warranty
+                    </div>
+                  </div>
+
+                  <p style={consentNoteStyle}>
+                    By submitting your details you agree that ProAir may contact
+                    you about your enquiry. If you don&apos;t complete this form
+                    a member of our team may still follow up using the details
+                    you&apos;ve provided. See our privacy policy for more.
+                  </p>
+
+                  <button
+                    type="submit"
+                    style={{
+                      ...buttonStyle,
+                      opacity: isSubmitting ? 0.7 : 1,
+                      cursor: isSubmitting ? "wait" : "pointer",
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Sending…" : "Get my guide prices"}
+                  </button>
+                </>
+              )}
+
+              {/* Step 3 — Results reveal. Full pricing, recommended systems
+                  and WhatsApp CTA only appear after a successful submit. */}
+              {hasSubmitted && (
                 <>
                   <div style={summaryCardStyle}>
                     <div style={summaryHeaderStyle}>
-                      <strong>Estimate summary</strong>
-                      <span style={summaryTagStyle}>Live</span>
+                      <strong>Your estimate</strong>
+                      <span style={summaryTagStyle}>Ready</span>
                     </div>
 
                     <div style={statsGridStyle}>
@@ -1186,10 +1316,6 @@ Thank you.
                         <p style={statValueStyle}>
                           {customerEstimate.totalRecommended} kW
                         </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Rooms</strong>
-                        <p style={statValueStyle}>{customerRooms.length}</p>
                       </div>
                       <div style={statCardStyle}>
                         <strong>Cooling cost</strong>
@@ -1212,7 +1338,7 @@ Thank you.
                     </p>
                   </div>
 
-                  {customerDetailsComplete ? (
+                  {!isDesktop && (
                     <div style={systemsWrapStyle}>
                       <div style={sectionTitleStyle}>
                         Recommended systems & guide price
@@ -1223,60 +1349,29 @@ Thank you.
                         setSelectedCustomerSystem={setSelectedCustomerSystem}
                       />
                     </div>
-                  ) : (
-                    <div style={unlockCardStyle}>
-                      <div style={unlockTitleStyle}>🔓 Unlock guide prices</div>
-                      <p style={unlockTextStyle}>
-                        Enter your contact details at the top of the page to
-                        reveal guide system prices.
-                      </p>
-                    </div>
                   )}
+
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={waStyle}
+                  >
+                    📲 Send this estimate to ProAir on WhatsApp
+                  </a>
+
+                  <p style={helperTextStyle}>
+                    Thanks — we&apos;ve sent your details to the ProAir team.
+                    Most customers receive a reply within 10 minutes during
+                    working hours.
+                  </p>
+
+                  <p style={priceNoteStyle}>
+                    Guide price only. Final cost depends on pipe runs,
+                    electrics, access and installation layout.
+                  </p>
                 </>
               )}
-
-              <div style={benefitsCardStyle}>
-                <div style={benefitItemStyle}>
-                  ✔ {customerRooms.length === 1 &&
-                    "1 unit: typically 4–6 hours"}
-                  {customerRooms.length === 2 &&
-                    "2 units: typically completed in 1 day"}
-                  {customerRooms.length === 3 &&
-                    "3 units: typically 1–2 days"}
-                  {customerRooms.length >= 4 &&
-                    "4+ units: typically 2–3 days"}
-                </div>
-                <div style={benefitItemStyle}>✔ Free site survey included</div>
-                <div style={benefitItemStyle}>
-                  ✔ F-Gas certified installation
-                </div>
-                <div style={benefitItemStyle}>
-                  ✔ Up to 7-year manufacturer warranty
-                </div>
-              </div>
-
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                style={waStyle}
-              >
-                📲 Send this estimate to ProAir on WhatsApp
-              </a>
-
-              <p style={helperTextStyle}>
-                Most customers receive a reply within 10 minutes during working
-                hours.
-              </p>
-
-              <p style={priceNoteStyle}>
-                Guide price only. Final cost depends on pipe runs, electrics,
-                access and installation layout.
-              </p>
-
-              <button type="submit" style={buttonStyle}>
-                Send estimate request
-              </button>
             </form>
           </div>
 
@@ -1289,71 +1384,76 @@ Thank you.
                     <span style={{ color: "#0b6f8f" }}>AIR</span>
                   </div>
 
-                  <div style={sidebarMiniTextStyle}>Live install estimate</div>
-
-                  <div style={sidebarSectionStyle}>
-                    <div style={sidebarSectionTitleStyle}>Customer summary</div>
-
-                    <div style={detailChipGridStyle}>
-                      <DetailChip icon="👤" label="Customer" value={customerName} />
-                      <DetailChip icon="📞" label="Phone" value={customerPhone} />
-                      <DetailChip icon="📧" label="Email" value={customerEmail} />
-                      <DetailChip
-                        icon="📍"
-                        label="Postcode"
-                        value={customerPostcode}
-                      />
-                      <DetailChip
-                        icon="🕒"
-                        label="Timeframe"
-                        value={installTimeframe || "Not specified"}
-                      />
-                      <DetailChip
-                        icon="🏠"
-                        label="Rooms"
-                        value={`${customerRooms.length} room(s)`}
-                      />
-                    </div>
+                  <div style={sidebarMiniTextStyle}>
+                    {hasSubmitted
+                      ? "Your estimate"
+                      : hasAnySizedRoom
+                      ? "Live sizing"
+                      : "Get started"}
                   </div>
 
-                  <div style={sidebarSectionStyle}>
-                    <div style={sidebarSectionTitleStyle}>Estimate summary</div>
-
-                    <div style={statsGridStyle}>
-                      <div style={statCardStyle}>
-                        <strong>Total cooling load</strong>
-                        <p style={statValueStyle}>
-                          {customerEstimate.totalLoad} kW
-                        </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Suggested capacity</strong>
-                        <p style={statValueStyle}>
-                          {customerEstimate.totalRecommended} kW
-                        </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Cooling cost</strong>
-                        <p style={statValueStyle}>
-                          £{customerEstimate.estimatedCoolingMonthly}/mo
-                        </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Heating cost</strong>
-                        <p style={statValueStyle}>
-                          £{customerEstimate.estimatedHeatingMonthly}/mo
-                        </p>
-                      </div>
+                  {!hasAnySizedRoom && (
+                    <div style={unlockCardStyle}>
+                      <div style={unlockTitleStyle}>📐 Add a room</div>
+                      <p style={unlockTextStyle}>
+                        Enter at least one room&apos;s length and width to see
+                        its suggested system size.
+                      </p>
                     </div>
+                  )}
 
-                    <p style={priceNoteStyle}>
-                      Estimated running costs based on typical domestic use and
-                      current electricity prices. Actual costs vary by use,
-                      insulation and tariff.
-                    </p>
-                  </div>
+                  {hasAnySizedRoom && (
+                    <div style={sidebarSectionStyle}>
+                      <div style={sidebarSectionTitleStyle}>
+                        {hasSubmitted ? "Estimate summary" : "Sizing so far"}
+                      </div>
 
-                  {customerDetailsComplete ? (
+                      <div style={statsGridStyle}>
+                        <div style={statCardStyle}>
+                          <strong>Total cooling load</strong>
+                          <p style={statValueStyle}>
+                            {customerEstimate.totalLoad} kW
+                          </p>
+                        </div>
+                        <div style={statCardStyle}>
+                          <strong>Suggested capacity</strong>
+                          <p style={statValueStyle}>
+                            {customerEstimate.totalRecommended} kW
+                          </p>
+                        </div>
+                        <div style={statCardStyle}>
+                          <strong>Rooms</strong>
+                          <p style={statValueStyle}>{customerRooms.length}</p>
+                        </div>
+                        {hasSubmitted && (
+                          <>
+                            <div style={statCardStyle}>
+                              <strong>Cooling cost</strong>
+                              <p style={statValueStyle}>
+                                £{customerEstimate.estimatedCoolingMonthly}/mo
+                              </p>
+                            </div>
+                            <div style={statCardStyle}>
+                              <strong>Heating cost</strong>
+                              <p style={statValueStyle}>
+                                £{customerEstimate.estimatedHeatingMonthly}/mo
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {hasSubmitted && (
+                        <p style={priceNoteStyle}>
+                          Estimated running costs based on typical domestic use
+                          and current electricity prices. Actual costs vary by
+                          use, insulation and tariff.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {hasSubmitted ? (
                     <>
                       <div style={sidebarSectionStyle}>
                         <div style={sidebarSectionTitleStyle}>
@@ -1376,15 +1476,15 @@ Thank you.
                         📲 Send on WhatsApp
                       </a>
                     </>
-                  ) : (
+                  ) : hasAnySizedRoom ? (
                     <div style={unlockCardStyle}>
                       <div style={unlockTitleStyle}>🔓 Unlock guide prices</div>
                       <p style={unlockTextStyle}>
-                        Enter your contact details to reveal the guide system
-                        prices.
+                        Add your contact details below and submit to reveal
+                        recommended systems and guide prices.
                       </p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1987,6 +2087,18 @@ const priceNoteStyle = {
   color: "#64748b",
   marginBottom: "14px",
   lineHeight: 1.55,
+};
+
+const consentNoteStyle = {
+  fontSize: "12px",
+  color: "#64748b",
+  marginTop: "18px",
+  marginBottom: "16px",
+  lineHeight: 1.55,
+  padding: "12px 14px",
+  background: "rgba(11, 111, 143, 0.06)",
+  border: "1px solid rgba(11, 111, 143, 0.14)",
+  borderRadius: "12px",
 };
 
 const buttonStyle = {
