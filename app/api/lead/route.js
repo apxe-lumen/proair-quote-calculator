@@ -62,6 +62,22 @@ export async function POST(req) {
       }</pre>
     `;
 
+    const discountLine = data.totalDiscount > 0
+      ? `<p><strong>Multi-room saving:</strong> £${formatMoney(data.totalDiscount)} off (first unit full price, extras discounted)</p>`
+      : "";
+
+    const outdoorLine = data.outdoorLocation
+      ? `<p><strong>Outdoor unit preference:</strong> ${escapeHtml(data.outdoorLocation)}</p>`
+      : "";
+
+    const twoOutdoorLine = data.suggestTwoOutdoors
+      ? `<p><strong>⚠ Recommended:</strong> 2 outdoor units (${safe.rooms} indoor units)</p>`
+      : "";
+
+    const accessLine = data.hasUpperFloorRoom
+      ? `<p><strong>⚠ Access note:</strong> One or more rooms above ground floor — may need access equipment.</p>`
+      : "";
+
     const pricingBlock = `
       <h3>Guide prices</h3>
       <p><strong>Selected system:</strong> ${safe.system}</p>
@@ -72,6 +88,10 @@ export async function POST(req) {
           ? `£${formatMoney(data.zenPrice)}`
           : "Not available above 5.0kW per room"
       }</p>
+      ${discountLine}
+      ${outdoorLine}
+      ${twoOutdoorLine}
+      ${accessLine}
     `;
 
     const notesBlock = `

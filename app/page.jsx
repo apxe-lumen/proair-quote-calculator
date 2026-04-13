@@ -2,8 +2,17 @@
 
 import Script from "next/script";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-const unitSizes = [2.0, 2.5, 3.5, 4.2, 5.0, 6.0, 7.1, 8.5, 10.0];
+import {
+  unitSizes,
+  brandPricing,
+  wattsPerM2,
+  glazingUplift,
+  exposureUplift,
+  heightUplifts,
+  insulationFactor,
+  multiRoomDiscount,
+  maxIndoorsPerOutdoor,
+} from "./config";
 
 const defaultCustomerRoom = {
   id: 1,
@@ -14,6 +23,7 @@ const defaultCustomerRoom = {
   roomType: "living",
   glazing: "medium",
   exposure: "south",
+  insulation: "average",
   floorLevel: "ground",
   outdoorSide: "same_side",
 };
@@ -26,23 +36,21 @@ function roundToRecommendedSize(kw) {
 }
 
 function getUnitPrice(brand, size) {
-  if (brand === "mitsubishi") {
-    if (size <= 3.5) return 1800;
-    if (size <= 5.0) return 2400;
-    if (size <= 7.1) return 3000;
-    return 3500;
+  const tiers = brandPricing[brand];
+  if (!tiers) return null;
+  for (const [maxKw, price] of tiers) {
+    if (size <= maxKw) return price;
   }
+  return null;
+}
 
-  if (brand === "zen") {
-    if (size <= 3.5) return 2400;
-    if (size <= 5.0) return 3000;
-    return null;
+function getMultiRoomDiscount(sizedRoomCount) {
+  if (sizedRoomCount < 2) return 0;
+  let discountPerExtra = 0;
+  for (const [minRooms, amount] of multiRoomDiscount) {
+    if (sizedRoomCount >= minRooms) discountPerExtra = amount;
   }
-
-  if (size <= 3.5) return 1500;
-  if (size <= 5.0) return 2000;
-  if (size <= 7.1) return 2600;
-  return 3000;
+  return discountPerExtra * (sizedRoomCount - 1);
 }
 
 function calculateRoom(room) {
@@ -61,24 +69,17 @@ function calculateRoom(room) {
   const height = Number(room.height || 0);
   const area = length * width;
 
-  let wattsPerM2 = 125;
-  if (room.roomType === "bedroom") wattsPerM2 = 110;
-  if (room.roomType === "office") wattsPerM2 = 130;
-  if (room.roomType === "garden_room") wattsPerM2 = 135;
-  if (room.roomType === "kitchen") wattsPerM2 = 150;
+  const baseWatts = wattsPerM2[room.roomType] ?? wattsPerM2.living;
 
   let factor = 1;
-  if (room.glazing === "medium") factor += 0.1;
-  if (room.glazing === "high") factor += 0.22;
-  if (room.glazing === "very_high") factor += 0.35;
+  factor += glazingUplift[room.glazing] ?? 0;
+  factor += exposureUplift[room.exposure] ?? 0;
+  for (const [aboveMetres, uplift] of heightUplifts) {
+    if (height > aboveMetres) factor += uplift;
+  }
 
-  if (room.exposure === "west") factor += 0.08;
-  if (room.exposure === "south") factor += 0.14;
-
-  if (height > 2.7) factor += 0.08;
-  if (height > 3.0) factor += 0.08;
-
-  const kw = (area * wattsPerM2 * factor) / 1000;
+  const insFactor = insulationFactor[room.insulation] ?? 1;
+  const kw = (area * baseWatts * factor * insFactor) / 1000;
   const recommended = roundToRecommendedSize(kw);
 
   return {
@@ -449,9 +450,11 @@ export default function Page() {
   const [selectedCustomerSystem, setSelectedCustomerSystem] =
     useState("mitsubishi");
   const [isDesktop, setIsDesktop] = useState(false);
+  const [outdoorLocation, setOutdoorLocation] = useState("");
   const [expandedRoomIds, setExpandedRoomIds] = useState([1]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   // "none" → nothing sent. "partial" → abandonment lead fired.
   // "completed" → full quote submitted (terminal — no further sends).
@@ -460,6 +463,10 @@ export default function Page() {
 
   const hasAnySizedRoom = customerRooms.some(
     (room) => Number(room.length) > 0 && Number(room.width) > 0
+  );
+
+  const hasUpperFloorRoom = customerRooms.some(
+    (room) => room.floorLevel && room.floorLevel !== "ground"
   );
 
   const customerDetailsComplete =
@@ -471,6 +478,24 @@ export default function Page() {
   // Basic shape check so we don't fire partial leads on half-typed emails.
   const contactDetailsValid =
     customerDetailsComplete && /^\S+@\S+\.\S+$/.test(customerEmail.trim());
+
+  const validationErrors = [];
+  if (!hasAnySizedRoom)
+    validationErrors.push("Enter length and width for at least one room.");
+  customerRooms.forEach((room) => {
+    const l = Number(room.length);
+    const w = Number(room.width);
+    if (room.length && (l <= 0 || l > 50))
+      validationErrors.push(`${room.name}: length must be between 0 and 50m.`);
+    if (room.width && (w <= 0 || w > 50))
+      validationErrors.push(`${room.name}: width must be between 0 and 50m.`);
+  });
+  if (!customerName.trim()) validationErrors.push("Name is required.");
+  if (!customerPhone.trim()) validationErrors.push("Phone number is required.");
+  if (!customerEmail.trim()) validationErrors.push("Email is required.");
+  else if (!/^\S+@\S+\.\S+$/.test(customerEmail.trim()))
+    validationErrors.push("Enter a valid email address.");
+  if (!customerPostcode.trim()) validationErrors.push("Postcode is required.");
 
   useEffect(() => {
     const updateLayout = () => {
@@ -581,19 +606,31 @@ export default function Page() {
         }, 0)
       : null;
 
+    const sizedRoomCount = sizedRoomResults.length;
+    const totalDiscount = getMultiRoomDiscount(sizedRoomCount);
+    const mideaDiscounted = Math.max(0, mideaTotal - totalDiscount);
+    const mitsubishiDiscounted = Math.max(0, mitsubishiTotal - totalDiscount);
+    const zenDiscounted = zenEligible && zenTotal !== null
+      ? Math.max(0, zenTotal - totalDiscount)
+      : null;
+    const suggestTwoOutdoors = sizedRoomCount > maxIndoorsPerOutdoor;
+
     const estimatedCoolingMonthly = Math.round(totalRecommended * 3);
     const estimatedHeatingMonthly = Math.round(totalRecommended * 4);
 
     return {
       totalLoad: totalLoad.toFixed(2),
       totalRecommended: totalRecommended.toFixed(1),
-      mideaTotal,
-      mitsubishiTotal,
-      zenTotal,
+      mideaTotal: mideaDiscounted,
+      mitsubishiTotal: mitsubishiDiscounted,
+      zenTotal: zenDiscounted,
       zenEligible,
       roomResults,
       estimatedCoolingMonthly,
       estimatedHeatingMonthly,
+      sizedRoomCount,
+      totalDiscount,
+      suggestTwoOutdoors,
     };
   }, [customerRooms]);
 
@@ -639,6 +676,12 @@ export default function Page() {
     zenEligible: customerEstimate.zenEligible,
     notes: customerNotes,
     timeframe: installTimeframe,
+    totalDiscount: customerEstimate.totalDiscount,
+    suggestTwoOutdoors: customerEstimate.suggestTwoOutdoors,
+    outdoorLocation: customerEstimate.sizedRoomCount >= 2
+      ? outdoorLocation
+      : customerRooms[0]?.outdoorSide || "",
+    hasUpperFloorRoom,
   });
 
   // Partial-lead capture: if the user finishes typing valid contact details
@@ -729,7 +772,10 @@ export default function Page() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (isSubmitting || leadStageRef.current === "completed") return;
-    if (!hasAnySizedRoom || !contactDetailsValid) return;
+    if (validationErrors.length > 0) {
+      setShowErrors(true);
+      return;
+    }
 
     // Cancel any pending partial-lead send — submit supersedes it.
     if (partialTimerRef.current) {
@@ -778,6 +824,14 @@ Guide price: ${
       selectedGuidePrice !== null
         ? `£${selectedGuidePrice.toLocaleString()}`
         : "Not available"
+    }${
+      customerEstimate.totalDiscount > 0
+        ? `\nMulti-room saving: £${customerEstimate.totalDiscount.toLocaleString()} off`
+        : ""
+    }${
+      customerEstimate.suggestTwoOutdoors
+        ? "\nRecommended: 2 outdoor units"
+        : ""
     }
 
 Please let me know the next available date for a survey.
@@ -836,6 +890,15 @@ Thank you.
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
+              <fieldset
+                disabled={hasSubmitted}
+                style={{
+                  border: "none",
+                  margin: 0,
+                  padding: 0,
+                  opacity: hasSubmitted ? 0.6 : 1,
+                }}
+              >
               <div style={sectionTitleStyle}>Rooms</div>
 
               <div style={roomHeaderRowStyle}>
@@ -843,13 +906,15 @@ Thank you.
                   Add each room you want to estimate.
                 </p>
 
-                <button
-                  type="button"
-                  onClick={addCustomerRoom}
-                  style={smallButtonStyle}
-                >
-                  + Add room
-                </button>
+                {!hasSubmitted && (
+                  <button
+                    type="button"
+                    onClick={addCustomerRoom}
+                    style={smallButtonStyle}
+                  >
+                    + Add room
+                  </button>
+                )}
               </div>
 
               {customerRooms.map((room, index) => {
@@ -1057,6 +1122,31 @@ Thank you.
 
                         <div style={responsiveGridStyle}>
                           <div>
+                            <label style={labelStyle}>Insulation</label>
+                            <select
+                              value={room.insulation}
+                              onChange={(e) =>
+                                updateCustomerRoom(
+                                  room.id,
+                                  "insulation",
+                                  e.target.value
+                                )
+                              }
+                              style={inputStyle}
+                            >
+                              <option value="modern">
+                                Modern / well-insulated
+                              </option>
+                              <option value="average">Average</option>
+                              <option value="poor">
+                                Older / poorly-insulated
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div style={responsiveGridStyle}>
+                          <div>
                             <label style={labelStyle}>Floor level</label>
                             <select
                               value={room.floorLevel}
@@ -1074,32 +1164,34 @@ Thank you.
                               <option value="loft">Loft / second floor</option>
                             </select>
                           </div>
-                          <div>
-                            <label style={labelStyle}>
-                              Best outdoor unit position
-                            </label>
-                            <select
-                              value={room.outdoorSide}
-                              onChange={(e) =>
-                                updateCustomerRoom(
-                                  room.id,
-                                  "outdoorSide",
-                                  e.target.value
-                                )
-                              }
-                              style={inputStyle}
-                            >
-                              <option value="same_side">
-                                Same side as room
-                              </option>
-                              <option value="front">Front of property</option>
-                              <option value="rear">Rear of property</option>
-                              <option value="side">Side elevation</option>
-                              <option value="opposite_side">
-                                Opposite side of property
-                              </option>
-                            </select>
-                          </div>
+                          {customerEstimate.sizedRoomCount < 2 && (
+                            <div>
+                              <label style={labelStyle}>
+                                Outdoor unit location
+                              </label>
+                              <select
+                                value={room.outdoorSide}
+                                onChange={(e) =>
+                                  updateCustomerRoom(
+                                    room.id,
+                                    "outdoorSide",
+                                    e.target.value
+                                  )
+                                }
+                                style={inputStyle}
+                              >
+                                <option value="same_side">
+                                  Same side as room
+                                </option>
+                                <option value="front">Front of property</option>
+                                <option value="rear">Rear of property</option>
+                                <option value="side">Side elevation</option>
+                                <option value="opposite_side">
+                                  Opposite side of property
+                                </option>
+                              </select>
+                            </div>
+                          )}
                         </div>
 
                         <div style={summaryCardStyle}>
@@ -1135,6 +1227,49 @@ Thank you.
                   </div>
                 );
               })}
+
+              {customerEstimate.sizedRoomCount >= 2 && (
+                <div>
+                  <label style={labelStyle}>
+                    Outdoor unit location
+                  </label>
+                  <p style={{ ...cardSubtitleStyle, marginBottom: "8px" }}>
+                    Where would the outdoor unit ideally go relative to all
+                    your rooms?
+                  </p>
+                  <select
+                    value={outdoorLocation}
+                    onChange={(e) => setOutdoorLocation(e.target.value)}
+                    style={inputStyle}
+                  >
+                    <option value="">Select location</option>
+                    <option value="front">Front of property</option>
+                    <option value="rear">Rear of property</option>
+                    <option value="side">Side of property</option>
+                    <option value="split">
+                      Split — units on both sides of the house
+                    </option>
+                    <option value="not_sure">
+                      Not sure — advise at survey
+                    </option>
+                  </select>
+                </div>
+              )}
+
+              {customerEstimate.suggestTwoOutdoors && (
+                <div style={infoNoteStyle}>
+                  Based on {customerEstimate.sizedRoomCount} rooms, we&apos;d
+                  recommend 2 outdoor units to spread the load and allow for
+                  future expansion. This will be confirmed at your site survey.
+                </div>
+              )}
+
+              {customerEstimate.totalDiscount > 0 && (
+                <div style={discountNoteStyle}>
+                  Multi-room saving: £{customerEstimate.totalDiscount.toLocaleString()} off
+                  — first unit full price, additional units discounted.
+                </div>
+              )}
 
               <div>
                 <label style={labelStyle}>Anything else we should know?</label>
@@ -1277,8 +1412,25 @@ Thank you.
                     By submitting your details you agree that ProAir may contact
                     you about your enquiry. If you don&apos;t complete this form
                     a member of our team may still follow up using the details
-                    you&apos;ve provided. See our privacy policy for more.
+                    you&apos;ve provided. See our{" "}
+                    <a
+                      href="https://www.proairuk.co.uk/privacy-policy/"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: "#0b6f8f" }}
+                    >
+                      privacy policy
+                    </a>{" "}
+                    for more.
                   </p>
+
+                  {showErrors && validationErrors.length > 0 && (
+                    <div style={errorListStyle}>
+                      {validationErrors.map((err, i) => (
+                        <div key={i}>{err}</div>
+                      ))}
+                    </div>
+                  )}
 
                   <button
                     type="submit"
@@ -1294,62 +1446,72 @@ Thank you.
                 </>
               )}
 
-              {/* Step 3 — Results reveal. Full pricing, recommended systems
-                  and WhatsApp CTA only appear after a successful submit. */}
+              </fieldset>
+
+              {/* Step 3 — Results reveal after a successful submit. */}
               {hasSubmitted && (
                 <>
-                  <div style={summaryCardStyle}>
-                    <div style={summaryHeaderStyle}>
-                      <strong>Your estimate</strong>
-                      <span style={summaryTagStyle}>Ready</span>
-                    </div>
-
-                    <div style={statsGridStyle}>
-                      <div style={statCardStyle}>
-                        <strong>Total cooling load</strong>
-                        <p style={statValueStyle}>
-                          {customerEstimate.totalLoad} kW
-                        </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Suggested capacity</strong>
-                        <p style={statValueStyle}>
-                          {customerEstimate.totalRecommended} kW
-                        </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Cooling cost</strong>
-                        <p style={statValueStyle}>
-                          £{customerEstimate.estimatedCoolingMonthly}/mo
-                        </p>
-                      </div>
-                      <div style={statCardStyle}>
-                        <strong>Heating cost</strong>
-                        <p style={statValueStyle}>
-                          £{customerEstimate.estimatedHeatingMonthly}/mo
-                        </p>
-                      </div>
-                    </div>
-
-                    <p style={priceNoteStyle}>
-                      Estimated running costs based on typical domestic use and
-                      current electricity prices. Actual costs vary by use,
-                      insulation and tariff.
-                    </p>
-                  </div>
-
+                  {/* Mobile: full estimate block (desktop has this in sidebar) */}
                   {!isDesktop && (
-                    <div style={systemsWrapStyle}>
-                      <div style={sectionTitleStyle}>
-                        Recommended systems & guide price
+                    <>
+                      <div style={summaryCardStyle}>
+                        <div style={summaryHeaderStyle}>
+                          <strong>Your estimate</strong>
+                          <span style={summaryTagStyle}>Ready</span>
+                        </div>
+
+                        <div style={statsGridStyle}>
+                          <div style={statCardStyle}>
+                            <strong>Total cooling load</strong>
+                            <p style={statValueStyle}>
+                              {customerEstimate.totalLoad} kW
+                            </p>
+                          </div>
+                          <div style={statCardStyle}>
+                            <strong>Suggested capacity</strong>
+                            <p style={statValueStyle}>
+                              {customerEstimate.totalRecommended} kW
+                            </p>
+                          </div>
+                          <div style={statCardStyle}>
+                            <strong>Cooling cost</strong>
+                            <p style={statValueStyle}>
+                              £{customerEstimate.estimatedCoolingMonthly}/mo
+                            </p>
+                          </div>
+                          <div style={statCardStyle}>
+                            <strong>Heating cost</strong>
+                            <p style={statValueStyle}>
+                              £{customerEstimate.estimatedHeatingMonthly}/mo
+                            </p>
+                          </div>
+                        </div>
+
+                        <p style={priceNoteStyle}>
+                          Estimated running costs based on typical domestic use
+                          and current electricity prices. Actual costs vary by
+                          use, insulation and tariff.
+                        </p>
                       </div>
-                      <SystemCardsDeck
-                        customerEstimate={customerEstimate}
-                        selectedCustomerSystem={selectedCustomerSystem}
-                        setSelectedCustomerSystem={setSelectedCustomerSystem}
-                      />
-                    </div>
+
+                      <div style={systemsWrapStyle}>
+                        <div style={sectionTitleStyle}>
+                          Recommended systems & guide price
+                        </div>
+                        <SystemCardsDeck
+                          customerEstimate={customerEstimate}
+                          selectedCustomerSystem={selectedCustomerSystem}
+                          setSelectedCustomerSystem={setSelectedCustomerSystem}
+                        />
+                      </div>
+                    </>
                   )}
+
+                  <p style={helperTextStyle}>
+                    Thanks — we&apos;ve sent your details to the ProAir team.
+                    Most customers receive a reply within 10 minutes during
+                    working hours.
+                  </p>
 
                   <a
                     href={whatsappHref}
@@ -1360,11 +1522,13 @@ Thank you.
                     📲 Send this estimate to ProAir on WhatsApp
                   </a>
 
-                  <p style={helperTextStyle}>
-                    Thanks — we&apos;ve sent your details to the ProAir team.
-                    Most customers receive a reply within 10 minutes during
-                    working hours.
-                  </p>
+                  {hasUpperFloorRoom && (
+                    <div style={infoNoteStyle}>
+                      One or more rooms are above ground floor. Additional
+                      costs may apply if access equipment is required for
+                      installation.
+                    </div>
+                  )}
 
                   <p style={priceNoteStyle}>
                     Guide price only. Final cost depends on pipe runs,
@@ -1475,6 +1639,13 @@ Thank you.
                       >
                         📲 Send on WhatsApp
                       </a>
+
+                      {hasUpperFloorRoom && (
+                        <div style={{ ...infoNoteStyle, marginTop: "12px" }}>
+                          One or more rooms are above ground floor. Additional
+                          costs may apply if access equipment is required.
+                        </div>
+                      )}
                     </>
                   ) : hasAnySizedRoom ? (
                     <div style={unlockCardStyle}>
@@ -1902,7 +2073,7 @@ const systemDeckItemStyle = {
 
 const sidebarSystemsStackStyle = {
   display: "grid",
-  gap: "12px",
+  gap: "14px",
 };
 
 const systemCardStyle = {
@@ -1916,6 +2087,7 @@ const systemCardStyle = {
 
 const systemCardCompactStyle = {
   padding: "14px",
+  minHeight: "auto",
 };
 
 const selectedSystemCardStyle = {
@@ -2099,6 +2271,40 @@ const consentNoteStyle = {
   background: "rgba(11, 111, 143, 0.06)",
   border: "1px solid rgba(11, 111, 143, 0.14)",
   borderRadius: "12px",
+};
+
+const errorListStyle = {
+  fontSize: "13px",
+  color: "#b91c1c",
+  background: "rgba(239, 68, 68, 0.08)",
+  border: "1px solid rgba(239, 68, 68, 0.22)",
+  borderRadius: "12px",
+  padding: "12px 14px",
+  marginBottom: "14px",
+  lineHeight: 1.7,
+};
+
+const infoNoteStyle = {
+  fontSize: "13px",
+  color: "#0b6f8f",
+  background: "rgba(11, 111, 143, 0.08)",
+  border: "1px solid rgba(11, 111, 143, 0.18)",
+  borderRadius: "12px",
+  padding: "12px 14px",
+  marginBottom: "14px",
+  lineHeight: 1.55,
+};
+
+const discountNoteStyle = {
+  fontSize: "13px",
+  color: "#15803d",
+  background: "rgba(34, 197, 94, 0.08)",
+  border: "1px solid rgba(34, 197, 94, 0.22)",
+  borderRadius: "12px",
+  padding: "12px 14px",
+  marginBottom: "14px",
+  lineHeight: 1.55,
+  fontWeight: 700,
 };
 
 const buttonStyle = {
