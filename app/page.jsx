@@ -297,9 +297,9 @@ function SystemCardsDeck({
               pillStyle={budgetPillStyle}
               selected={selectedCustomerSystem === "midea"}
               title="Midea Solstice"
-              description="Best value option for effective heating and cooling."
+              description="Reliable heating and cooling at the best price."
               priceText={`From £${customerEstimate.mideaTotal.toLocaleString()}`}
-              note="Good budget-friendly choice."
+              note="Great value for money."
               onClick={() => setSelectedCustomerSystem("midea")}
             />
           </div>
@@ -327,9 +327,9 @@ function SystemCardsDeck({
               selected={selectedCustomerSystem === "mitsubishi"}
               selectedBorder="green"
               title="Mitsubishi Electric AY"
-              description="Reliable all-round option with a more premium feel."
+              description="Premium quality with whisper-quiet operation."
               priceText={`From £${customerEstimate.mitsubishiTotal.toLocaleString()}`}
-              note="Popular balance of quality and value."
+              note="Our most popular choice."
               onClick={() => setSelectedCustomerSystem("mitsubishi")}
             />
           </div>
@@ -354,7 +354,7 @@ function SystemCardsDeck({
               pillStyle={premiumPillStyle}
               selected={selectedCustomerSystem === "zen"}
               title="Mitsubishi Zen"
-              description="Designer premium option for customers wanting a higher-end finish."
+              description="Sleek designer finish for a contemporary look."
               priceText={
                 customerEstimate.zenEligible
                   ? `From £${customerEstimate.zenTotal.toLocaleString()}`
@@ -362,7 +362,7 @@ function SystemCardsDeck({
               }
               note={
                 customerEstimate.zenEligible
-                  ? "Premium look and feel."
+                  ? "The best-looking unit on the market."
                   : "Zen range is not available above 5.0kW room sizes."
               }
               onClick={() => setSelectedCustomerSystem("zen")}
@@ -389,9 +389,9 @@ function SidebarSystemCards({
         pillStyle={budgetPillStyle}
         selected={selectedCustomerSystem === "midea"}
         title="Midea Solstice"
-        description="Best value option for effective heating and cooling."
+        description="Reliable heating and cooling at the best price."
         priceText={`From £${customerEstimate.mideaTotal.toLocaleString()}`}
-        note="Good budget-friendly choice."
+        note="Great value for money."
         onClick={() => setSelectedCustomerSystem("midea")}
         compact
       />
@@ -406,9 +406,9 @@ function SidebarSystemCards({
         selected={selectedCustomerSystem === "mitsubishi"}
         selectedBorder="green"
         title="Mitsubishi Electric AY"
-        description="Reliable all-round option with a more premium feel."
+        description="Premium quality with whisper-quiet operation."
         priceText={`From £${customerEstimate.mitsubishiTotal.toLocaleString()}`}
-        note="Popular balance of quality and value."
+        note="Our most popular choice."
         onClick={() => setSelectedCustomerSystem("mitsubishi")}
         compact
       />
@@ -420,7 +420,7 @@ function SidebarSystemCards({
         pillStyle={premiumPillStyle}
         selected={selectedCustomerSystem === "zen"}
         title="Mitsubishi Zen"
-        description="Designer premium option for customers wanting a higher-end finish."
+        description="Sleek designer finish for a contemporary look."
         priceText={
           customerEstimate.zenEligible
             ? `From £${customerEstimate.zenTotal.toLocaleString()}`
@@ -428,7 +428,7 @@ function SidebarSystemCards({
         }
         note={
           customerEstimate.zenEligible
-            ? "Premium look and feel."
+            ? "The best-looking unit on the market."
             : "Zen range is not available above 5.0kW room sizes."
         }
         onClick={() => setSelectedCustomerSystem("zen")}
@@ -640,15 +640,6 @@ export default function Page() {
     zen: "Mitsubishi Electric Zen",
   };
 
-  const selectedGuidePrice =
-    selectedCustomerSystem === "midea"
-      ? customerEstimate.mideaTotal
-      : selectedCustomerSystem === "zen"
-      ? customerEstimate.zenEligible
-        ? customerEstimate.zenTotal
-        : null
-      : customerEstimate.mitsubishiTotal;
-
   const roomBreakdown = customerRooms
     .map((room, index) => {
       const result = calculateRoom(room);
@@ -798,47 +789,12 @@ export default function Page() {
       console.error("Lead submit failed", error);
       leadStageRef.current = previousStage;
       alert(
-        "Sorry, we couldn't send your estimate just now. Please try again or message us on WhatsApp."
+        "Sorry, we couldn't send your estimate just now. Please try again."
       );
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const whatsappHref = `https://wa.me/447833679777?text=${encodeURIComponent(
-    `Hi ProAir
-
-I’ve just used your air conditioning estimator and would like to arrange a quote or site survey.
-
-System selected: ${systemNames[selectedCustomerSystem]}
-Number of rooms: ${customerRooms.length}
-Install timeframe: ${installTimeframe || "Not specified"}
-
-Room breakdown:
-${roomBreakdown}
-
-Estimated cooling load: ${customerEstimate.totalLoad} kW
-Recommended capacity: ${customerEstimate.totalRecommended} kW
-
-Guide price: ${
-      selectedGuidePrice !== null
-        ? `£${selectedGuidePrice.toLocaleString()}`
-        : "Not available"
-    }${
-      customerEstimate.totalDiscount > 0
-        ? `\nMulti-room saving: £${customerEstimate.totalDiscount.toLocaleString()} off`
-        : ""
-    }${
-      customerEstimate.suggestTwoOutdoors
-        ? "\nRecommended: 2 outdoor units"
-        : ""
-    }
-
-Please let me know the next available date for a survey.
-
-Thank you.
-`
-  )}`;
 
   return (
     <div style={pageStyle}>
@@ -858,18 +814,16 @@ Thank you.
 
       <div style={containerStyle}>
         <div style={heroStyle}>
-          <div style={brandBadgeStyle}>PROAIR</div>
-
           <h1 style={heroTitleStyle}>Quick estimate in under 30 seconds</h1>
 
           <p style={heroTextStyle}>
-            Add your room sizes below to get a guide system size, example options
-            and estimated installed price.
+            Add your rooms below for a guide price on installation, including
+            unit sizing and system options.
           </p>
 
           <div style={heroPillRowStyle}>
-            <div style={heroPillStyle}>❄️ Cooling & heating estimate</div>
-            <div style={heroPillStyle}>🏡 Domestic friendly</div>
+            <div style={heroPillStyle}>❄️ Cooling & heating</div>
+            <div style={heroPillStyle}>🏡 Homes & extensions</div>
             <div style={heroPillStyle}>✅ Free site survey included</div>
           </div>
         </div>
@@ -884,8 +838,8 @@ Thank you.
             <div style={sectionIntroStyle}>
               <h2 style={cardTitleStyle}>Get an estimate</h2>
               <p style={cardSubtitleStyle}>
-                Fill in the details below and ProAir will review your enquiry
-                and recommend the best setup.
+                Tell us about your rooms and we&apos;ll recommend the right
+                system for your home.
               </p>
             </div>
 
@@ -903,7 +857,7 @@ Thank you.
 
               <div style={roomHeaderRowStyle}>
                 <p style={cardSubtitleStyle}>
-                  Add each room you want to estimate.
+                  Add each room you&apos;d like air conditioning in.
                 </p>
 
                 {!hasSubmitted && (
@@ -1279,7 +1233,7 @@ Thank you.
                   onChange={(e) => setCustomerNotes(e.target.value)}
                   style={textAreaStyle}
                   rows={4}
-                  placeholder="Access notes, preferred outdoor unit position, parking info, or anything else helpful"
+                  placeholder="E.g. access restrictions, parking, preferred outdoor unit position, or anything else that might help"
                 />
               </div>
 
@@ -1319,8 +1273,8 @@ Thank you.
                 <>
                   <div style={sectionTitleStyle}>Your details</div>
                   <p style={cardSubtitleStyle}>
-                    Add your contact details and we&apos;ll send your guide
-                    prices and recommended systems.
+                    Enter your details and we&apos;ll send your personalised
+                    quote.
                   </p>
 
                   <div style={{ ...responsiveGridStyle, marginTop: "16px" }}>
@@ -1441,7 +1395,7 @@ Thank you.
                     }}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Sending…" : "Get my guide prices"}
+                    {isSubmitting ? "Sending…" : "Get my quote"}
                   </button>
                 </>
               )}
@@ -1507,20 +1461,14 @@ Thank you.
                     </>
                   )}
 
-                  <p style={helperTextStyle}>
-                    Thanks — we&apos;ve sent your details to the ProAir team.
-                    Most customers receive a reply within 10 minutes during
-                    working hours.
-                  </p>
-
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={waStyle}
-                  >
-                    📲 Send this estimate to ProAir on WhatsApp
-                  </a>
+                  <div style={thankYouCardStyle}>
+                    <h3 style={thankYouTitleStyle}>What happens next?</h3>
+                    <p style={thankYouTextStyle}>
+                      We&apos;ve sent a copy of your quote to your email. A
+                      member of the ProAir team will be in touch shortly to
+                      arrange your free site survey.
+                    </p>
+                  </div>
 
                   {hasUpperFloorRoom && (
                     <div style={infoNoteStyle}>
@@ -1630,15 +1578,6 @@ Thank you.
                           setSelectedCustomerSystem={setSelectedCustomerSystem}
                         />
                       </div>
-
-                      <a
-                        href={whatsappHref}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={waSidebarStyle}
-                      >
-                        📲 Send on WhatsApp
-                      </a>
 
                       {hasUpperFloorRoom && (
                         <div style={{ ...infoNoteStyle, marginTop: "12px" }}>
@@ -2236,15 +2175,26 @@ const benefitItemStyle = {
   fontWeight: 600,
 };
 
-const waStyle = {
-  display: "inline-block",
-  background: "#25D366",
-  color: "white",
-  textDecoration: "none",
-  padding: "13px 18px",
-  borderRadius: "14px",
+const thankYouCardStyle = {
+  background: "linear-gradient(135deg, #eef4ff 0%, #f0fdf4 100%)",
+  border: "1px solid #dbeafe",
+  borderRadius: "18px",
+  padding: "22px",
+  marginBottom: "14px",
+};
+
+const thankYouTitleStyle = {
+  fontSize: "20px",
   fontWeight: 800,
-  boxShadow: "0 10px 24px rgba(37,211,102,0.28)",
+  color: "#0b2e73",
+  margin: "0 0 8px 0",
+};
+
+const thankYouTextStyle = {
+  fontSize: "15px",
+  color: "#334155",
+  lineHeight: 1.6,
+  margin: 0,
 };
 
 const helperTextStyle = {
@@ -2403,19 +2353,6 @@ const detailChipValueStyle = {
   color: "#0f172a",
   lineHeight: 1.4,
   wordBreak: "break-word",
-};
-
-const waSidebarStyle = {
-  display: "block",
-  marginTop: "16px",
-  textAlign: "center",
-  background: "#25D366",
-  color: "white",
-  textDecoration: "none",
-  padding: "13px 18px",
-  borderRadius: "14px",
-  fontWeight: 800,
-  boxShadow: "0 10px 24px rgba(37,211,102,0.28)",
 };
 
 const unlockCardStyle = {
