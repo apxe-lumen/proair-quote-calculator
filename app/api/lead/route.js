@@ -189,8 +189,15 @@ export async function POST(req) {
     const data = await req.json();
     const stage = data.stage === "completed" ? "completed" : "partial";
 
-    // Basic payload validation
-    if (!data.email || !/^\S+@\S+\.\S+$/.test(data.email)) {
+    // Basic payload validation. The character class explicitly excludes
+    // comma/semicolon/angle brackets/quotes so a single field can't smuggle
+    // additional recipients into Mailgun's `to` parameter.
+    if (
+      !data.email ||
+      typeof data.email !== "string" ||
+      data.email.length > 254 ||
+      !/^[^\s,;<>"]+@[^\s,;<>"]+\.[^\s,;<>"]+$/.test(data.email)
+    ) {
       return Response.json(
         { success: false, error: "Valid email is required." },
         { status: 400 }
