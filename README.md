@@ -5,7 +5,8 @@ A lead-capture room-sizing and quote estimator for [ProAir UK](https://proairuk.
 ## Tech stack
 
 - **Next.js 14** (App Router) + **React 18**
-- **Resend** for transactional email
+- **Mailgun** (EU region) for transactional email
+- **ntfy.sh** for push notifications to the ProAir team
 - No database — leads are delivered straight to the sales inbox
 - Plain CSS-in-JS (inline style objects); no Tailwind or component library
 
@@ -13,7 +14,7 @@ A lead-capture room-sizing and quote estimator for [ProAir UK](https://proairuk.
 
 ```bash
 npm install
-cp .env.example .env.local   # then fill in your Resend API key
+cp .env.example .env.local   # then fill in your Mailgun + ntfy credentials
 npm run dev
 ```
 
@@ -23,13 +24,15 @@ Visit <http://localhost:3000>.
 
 | Name | Required | Purpose |
 |------|----------|---------|
-| `RESEND_API_KEY` | yes (prod), no (dev) | API key for sending lead emails via Resend. In development the `/api/lead` route logs a warning and no-ops when this is unset, so the UX flow can be tested without sending real email. |
+| `MAILGUN_API_KEY` | yes (prod), no (dev) | Mailgun Sending API key. In development the `/api/lead` route logs a warning and no-ops when this (or `MAILGUN_DOMAIN`) is unset, so the UX flow can be tested without sending real email. |
+| `MAILGUN_DOMAIN` | yes (prod) | Verified sending domain (e.g. `proairuk.co.uk`). |
+| `MAILGUN_REGION` | no | `eu` (default) or `us` — selects `api.eu.mailgun.net` vs `api.mailgun.net`. |
+| `MAILGUN_FROM` | no | From-address override. Defaults to `no-reply@${MAILGUN_DOMAIN}`. |
+| `PROAIR_EMAIL` | no | ProAir team inbox for lead notifications. Defaults to `contact@proairuk.co.uk`. |
+| `NTFY_TOPIC` | no | ntfy.sh topic name for push notifications on completed quotes. Omit to disable. |
+| `NTFY_TOKEN` | no | Bearer token for an authenticated/private ntfy topic. |
 
-Create `.env.local` with:
-
-```
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxx
-```
+See `.env.example` for the full template.
 
 ## How the funnel works
 
@@ -41,7 +44,7 @@ The calculator is a three-step flow built as a single page:
 
 ### Lead capture
 
-The tool sends leads to `contact@proairuk.co.uk` via Resend from the `/api/lead` route. Leads come in two flavours, differentiated by the `stage` field on the request body:
+The tool sends leads to `contact@proairuk.co.uk` via Mailgun from the `/api/lead` route, and (if `NTFY_TOPIC` is set) fires an ntfy push to the ProAir team for completed quotes. Leads come in two flavours, differentiated by the `stage` field on the request body:
 
 - **`stage: "completed"`** — the customer clicked submit. The email contains full contact details, sizing, room breakdown, selected system and guide prices for all three product tiers.
 - **`stage: "partial"`** — the customer entered valid contact details and sized at least one room, but did not submit. Sent automatically after a short debounce, or via `navigator.sendBeacon` on tab close. The email contains contact details and sizing but **withholds guide prices**, because the customer has not seen them yet. Sales should follow up directly to complete the quote.
@@ -54,7 +57,7 @@ Each session can produce at most one email — a completed submit supersedes any
 app/
   layout.jsx            Minimal root layout
   page.jsx              The entire calculator UI & client-side logic
-  api/lead/route.js     POST handler → sends lead email via Resend
+  api/lead/route.js     POST handler → sends lead email via Mailgun + ntfy push
 public/                 Product imagery (Midea, Mitsubishi AY, Zen)
 ```
 
@@ -84,7 +87,7 @@ Pricing is hard-coded tier-based in `app/page.jsx` (`getUnitPrice`). The Mitsubi
 
 ## Production notes
 
-- Lead emails currently send from Resend's shared sandbox address `onboarding@resend.dev`. Before going live, verify a domain with Resend and update the `from` field in `app/api/lead/route.js`.
+- Lead emails send from `MAILGUN_FROM` (defaults to `no-reply@${MAILGUN_DOMAIN}`). Make sure the sending domain is verified in Mailgun (SPF/DKIM/DMARC) before going live.
 - All interpolated customer input in the lead email is HTML-escaped to prevent injection in the sales inbox.
 - The tool collects personal data (name, phone, email, postcode) and automatically sends a "partial lead" email on abandonment. A visible consent notice is shown above the submit button — ProAir's privacy policy should cover the "we may follow up if you don't complete the form" case before going live.
 
