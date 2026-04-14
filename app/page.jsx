@@ -14,6 +14,18 @@ import {
   maxIndoorsPerOutdoor,
 } from "./config";
 
+function generateQuoteRef() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let suffix = "";
+  for (let i = 0; i < 4; i++)
+    suffix += chars[Math.floor(Math.random() * chars.length)];
+  return `PA-${y}-${m}${d}-${suffix}`;
+}
+
 const defaultCustomerRoom = {
   id: 1,
   name: "Living Room",
@@ -455,6 +467,7 @@ export default function Page() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+  const [quoteRef, setQuoteRef] = useState("");
 
   // "none" → nothing sent. "partial" → abandonment lead fired.
   // "completed" → full quote submitted (terminal — no further sends).
@@ -673,6 +686,20 @@ export default function Page() {
       ? outdoorLocation
       : customerRooms[0]?.outdoorSide || "",
     hasUpperFloorRoom,
+    roomDetails: customerEstimate.roomResults.map((r) => ({
+      name: r.name,
+      length: r.length,
+      width: r.width,
+      height: r.height,
+      area: r.area,
+      kw: r.kw,
+      recommended: r.recommended,
+      roomType: r.roomType,
+      glazing: r.glazing,
+      exposure: r.exposure,
+      insulation: r.insulation,
+      floorLevel: r.floorLevel,
+    })),
   });
 
   // Partial-lead capture: if the user finishes typing valid contact details
@@ -777,13 +804,15 @@ export default function Page() {
     setIsSubmitting(true);
     const previousStage = leadStageRef.current;
     leadStageRef.current = "completed";
+    const ref = generateQuoteRef();
 
     try {
       await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildLeadPayload("completed")),
+        body: JSON.stringify({ ...buildLeadPayload("completed"), quoteRef: ref }),
       });
+      setQuoteRef(ref);
       setHasSubmitted(true);
     } catch (error) {
       console.error("Lead submit failed", error);
@@ -1468,6 +1497,11 @@ export default function Page() {
                       member of the ProAir team will be in touch shortly to
                       arrange your free site survey.
                     </p>
+                    {quoteRef && (
+                      <p style={quoteRefStyle}>
+                        Your quote reference: <strong>{quoteRef}</strong>
+                      </p>
+                    )}
                   </div>
 
                   {hasUpperFloorRoom && (
@@ -2195,6 +2229,14 @@ const thankYouTextStyle = {
   color: "#334155",
   lineHeight: 1.6,
   margin: 0,
+};
+
+const quoteRefStyle = {
+  fontSize: "14px",
+  color: "#0b6f8f",
+  marginTop: "12px",
+  marginBottom: 0,
+  fontFamily: "monospace",
 };
 
 const helperTextStyle = {
